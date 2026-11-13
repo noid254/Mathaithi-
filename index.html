@@ -205,6 +205,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
 .chat .m{max-width:84%;padding:10px 13px;border-radius:16px;background:var(--s2);font-size:14px;animation:fade .25s}.chat .m.u{align-self:flex-end;background:var(--accent);color:var(--on);font-weight:600}
 .chat .qr{display:flex;flex-wrap:wrap;gap:8px;padding:0 14px 14px}.chat .qr button{padding:9px 14px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent);font:700 13px Inter}
 .chat form{padding:0 14px 14px;display:grid;grid-template-columns:1fr auto;gap:8px}
+/* jersey fan box */
+.jfb{display:grid;grid-template-columns:1fr auto;gap:8px;text-align:left}.jfb p{grid-column:1/-1;font-size:12px;color:#c8c8d4;text-align:center}.jfb input{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3)}
 /* toast */
 .toast{position:fixed;left:50%;bottom:calc(var(--tab) + env(safe-area-inset-bottom) + 84px);transform:translate(-50%,20px);background:#fff;color:#111;padding:11px 18px;border-radius:999px;font:600 14px Inter;opacity:0;pointer-events:none;transition:.25s;z-index:120;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -217,6 +219,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
 <header class="top"><div class="in">
   <button class="ib" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <button class="brand" id="homeBtn" aria-label="Home"><span class="cr" data-crest></span><b data-cn>Mathaithi United</b></button>
+  <button class="btn sm" id="loginBtn" type="button">Log in</button>
   <button class="ib" id="cartBtn" aria-label="Basket"><svg viewBox="0 0 24 24"><path d="M5 7h14l-1.2 11H6.2L5 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span class="n" id="cartN" hidden>0</span></button>
 </div></header>
 <div class="ticker" aria-label="Club updates"><div class="tk" id="tk"></div></div>
@@ -244,6 +247,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
     <div class="jact">
       <button class="btn blk" id="jAdd" type="button">Add to cart</button>
       <button class="btn line blk" id="jFan" type="button">Become a fan</button>
+      <form id="jFanBox" hidden class="jfb"><input type="tel" id="jPhone" inputmode="tel" placeholder="Your phone number" aria-label="Phone number" autocomplete="tel"><button class="btn sm" type="submit">Save</button><p>That is all we need. We text you game reminders and when the club needs your support.</p></form>
     </div>
     <button class="sub" id="jNo" type="button">Not now</button>
   </div>
@@ -392,10 +396,20 @@ var fmtD=function(d){return d.toLocaleDateString('en-GB',{weekday:'short',day:'n
 var FAN=store.get('fan',null),cart=[],WALL=store.get('wall',[]);
 var SAMPLE_CM=[{n:'Wanjiru K.',t:'Best atmosphere in the league. See you Saturday!',ago:'1h'},{n:'Brian M.',t:'That late header. Still shaking.',ago:'2d'},{n:'Faith N.',t:'My son loves the Saturday training. Thank you coach!',ago:'3d'}];
 function tier(p){return p>=300?'Gold':p>=100?'Silver':'Bronze'}
-function newFan(name,phone,sms,via){try{fetch('/api/fans',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team:CLUB.id,name:name,phone:phone,sms:!!sms})}).catch(function(){})}catch(e){}
-  FAN={name:name,no:'MU-'+String(Math.floor(1000+Math.random()*9000)),phone:phone,sms:!!sms,points:25,since:new Date().toISOString(),rem:{},checkins:0,jersey:(J.name||J.num)?{kit:J.kit,name:J.name,num:J.num,size:J.size}:null,via:via};
-  store.set('fan',FAN);renderTabs();renderTicker();toast('Welcome to the fan club, '+name.split(' ')[0]+'!')}
-function addPts(n){if(FAN){FAN.points+=n;store.set('fan',FAN)}}
+function cap(s){return String(s||'').toLowerCase().replace(/\b\w/g,function(c){return c.toUpperCase()})}
+function hasName(){return !!(FAN&&FAN.name&&FAN.name!=='Fan')}
+var syncT;function syncFan(){if(!FAN||!FAN.phone)return;clearTimeout(syncT);syncT=setTimeout(function(){try{fetch('/api/fans',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team:CLUB.id,name:FAN.name,phone:FAN.phone,sms:FAN.sms,data:FAN})}).catch(function(){})}catch(e){}},300)}
+function saveFan(){store.set('fan',FAN);syncFan()}
+function newFan(name,phone,sms,via){
+  var nm=(name||'').trim()||cap(J.name)||'Fan';
+  FAN={name:nm,no:CLUB.short+'-'+String(Math.floor(1000+Math.random()*9000)),phone:phone,sms:!!sms,points:25,since:new Date().toISOString(),rem:{},checkins:0,owns:false,jersey:(J.name||J.num)?{kit:J.kit,name:J.name,num:J.num,size:J.size}:null,via:via};
+  saveFan();renderTabs();renderTicker();renderHeader();toast('You are in the fan club'+(hasName()?', '+nm.split(' ')[0]:'')+'!')}
+function doLogin(phone,sms,cb){
+  function fresh(){newFan('',phone,sms,'login');cb(true)}
+  try{fetch('/api/fans/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team:CLUB.id,phone:phone})}).then(function(r){return r.json()}).then(function(j){
+    if(j&&j.found){FAN=Object.assign({name:'Fan',no:CLUB.short+'-'+String(Math.floor(1000+Math.random()*9000)),points:25,since:new Date().toISOString(),rem:{},checkins:0,jersey:null,owns:false,sms:true},j.fan,{phone:phone});store.set('fan',FAN);renderTabs();renderTicker();renderHeader();cb(false)}else fresh()}).catch(fresh)}catch(e){fresh()}}
+function renderHeader(){var b=$('#loginBtn');if(!b)return;if(FAN){b.className='ib';b.setAttribute('aria-label','My account');b.innerHTML='<span class="av" style="width:30px;height:30px;font-size:13px">'+esc((hasName()?FAN.name:'F').charAt(0).toUpperCase())+'</span>'}else{b.className='btn sm';b.setAttribute('aria-label','Log in');b.textContent='Log in'}}
+function addPts(n){if(FAN){FAN.points+=n;saveFan()}}
 function barcode(seed){var s=0,r='';for(var i=0;i<seed.length;i++)s=(s*31+seed.charCodeAt(i))%9973;var x=0,g=rng(s+1);while(x<196){var w=1+Math.floor(g()*3);r+='<rect x="'+x+'" y="0" width="'+w+'" height="26" fill="currentColor"/>';x+=w+1+Math.floor(g()*3)}return '<svg class="bc" viewBox="0 0 200 26" preserveAspectRatio="none" aria-hidden="true">'+r+'</svg>'}
 
 /* ---------- live data from the club API (falls back to the sample content above) ---------- */
@@ -431,11 +445,11 @@ function openCart(){
   else if(!FAN)h+='<p class="note">Fans get 10% off shirts and merch. Buying today makes you a fan automatically.</p>';
   h+='<div class="cm" style="grid-template-columns:1fr auto"><b>You pay</b><b style="font-size:22px">'+KES(t.total)+'</b></div>';
   if(t.club)h+='<p class="note">About '+KES(t.club)+' of this goes to '+esc(CLUB.name)+'.</p>';
-  h+='<form id="payForm">'+(FAN?'':'<label for="pN">Your name</label><input id="pN" type="text" required autocomplete="name">')+'<label for="pP">M-Pesa number</label><input id="pP" type="tel" inputmode="tel" placeholder="07XX XXX XXX" value="'+esc(FAN?FAN.phone:'')+'" required>'+(FAN?'':'<label class="chk"><input type="checkbox" id="pS" checked> Text me game-day reminders and ticket links</label>')+'<button class="btn blk" type="submit" style="margin-top:12px">Pay with M-Pesa</button></form><p class="note" id="payMsg" style="margin-top:10px" aria-live="polite">Prototype: no real payment is taken yet.</p>';
+  h+='<form id="payForm">'+'<label for="pP">M-Pesa number</label><input id="pP" type="tel" inputmode="tel" placeholder="07XX XXX XXX" value="'+esc(FAN?FAN.phone:'')+'" required>'+(FAN?'':'<label class="chk"><input type="checkbox" id="pS" checked> Text me game-day reminders and ticket links</label>')+'<button class="btn blk" type="submit" style="margin-top:12px">Pay with M-Pesa</button></form><p class="note" id="payMsg" style="margin-top:10px" aria-live="polite">Prototype: no real payment is taken yet.</p>';
   openSheet(h)}
 document.addEventListener('submit',function(e){
   var f=e.target;if(f.id==='payForm'){e.preventDefault();
-    var ph=$('#pP').value,nm=$('#pN')?$('#pN').value.trim():FAN.name,m=$('#payMsg');
+    var ph=$('#pP').value,nm=FAN?FAN.name:(cap(J.name)||'Fan'),m=$('#payMsg');
     if(!phoneOK(ph)){m.textContent='Enter a valid Kenyan number, like 0712 345 678.';m.style.color='#ff6b6b';return}
     if(!nm){m.textContent='Please add your name.';m.style.color='#ff6b6b';return}
     m.style.color='';m.textContent='Check your phone for the M-Pesa prompt...';$('button[type=submit]',f).disabled=true;
@@ -443,10 +457,11 @@ document.addEventListener('submit',function(e){
       var wasFan0=!!FAN;var hadShirt=cart.some(function(i){return /shirt/.test(i.t)}),tickets=cart.filter(function(i){return i.t==='Match ticket'}).length,wasNew=!FAN;
       if(!FAN)newFan(nm,ph,$('#pS')&&$('#pS').checked,'purchase');
       postOrder(nm,ph,wasFan0);if(hadShirt&&!FAN.jersey){FAN.jersey={kit:J.kit,name:J.name,num:J.num,size:J.size}}
-      addPts((hadShirt?30:0)+tickets*20+10);store.set('fan',FAN);cart=[];updCart();renderTabs();
+      if(hadShirt)FAN.owns=true;addPts((hadShirt?30:0)+tickets*20+10);saveFan();renderHeader();cart=[];updCart();renderTabs();
       openSheet('<h2 style="font-size:32px">Thank you, '+esc(FAN.name.split(' ')[0])+'</h2><p style="margin:10px 0">Order '+rid(6)+' confirmed.'+(wasNew?' You are now in the fan club. Your card is ready.':' Points added to your card.')+'</p><div class="opts"><button class="btn blk" data-go="card">See my card</button><button class="btn dk blk" data-act="close">Keep browsing</button></div><p class="note" style="margin-top:10px">Prototype: no payment or text message was sent.</p>');
       route()},1800);return}
-  if(f.id==='fanForm'){e.preventDefault();var n=$('#fN').value.trim(),p=$('#fP').value;if(!n||!phoneOK(p)){toast('Add your name and a valid Kenyan number');return}newFan(n,p,$('#fS').checked,'card');route();return}
+  if(f.id==='fanForm'||f.id==='loginForm'){e.preventDefault();var fp=f.id==='fanForm',p=$(fp?'#fP':'#lP').value,sm=$(fp?'#fS':'#lS').checked;if(!phoneOK(p)){toast('Enter a valid Kenyan number');return}doLogin(p,sm,function(isNew){closeSheet();renderHeader();route();toast(isNew?'Welcome to the fan club!':'Welcome back'+(hasName()?', '+FAN.name.split(' ')[0]:'')+'!')});return}
+  if(f.id==='nameForm'){e.preventDefault();var n=$('#nmI').value.trim();if(n){FAN.name=n.slice(0,40);saveFan();renderHeader();route();toast('Thanks, '+n.split(' ')[0])}return}
   if(f.id==='enrolForm'){e.preventDefault();var who=$('#eWho').value;openSheet('<h2 style="font-size:32px">Application received</h2><p style="margin:10px 0">Thank you. Reference <b>'+rid(6)+'</b>. A club official will call '+esc($('#eP').value||'you')+' about trial dates.</p><p class="note">Prototype: nothing was sent. Real enrolment needs a parent or guardian\'s consent for anyone under 18.</p><button class="btn blk" data-act="close" style="margin-top:12px">Done</button>');f.reset();return}
   if(f.id==='bookForm'){e.preventDefault();openSheet('<h2 style="font-size:32px">Session booked</h2><p style="margin:10px 0">Reference <b>'+rid(6)+'</b>: '+esc($('#bSq').selectedOptions[0].text)+', '+esc($('#bDate').selectedOptions[0].text)+' for '+esc($('#bC').value)+'. Bring boots, shin guards and water.</p><p class="note">Prototype: no booking was saved. Trials are subject to FKF approval and safeguarding rules.</p><button class="btn blk" data-act="close" style="margin-top:12px">Done</button>');f.reset();return}
   if(f.id==='sponForm'){e.preventDefault();var pk=PACKS.filter(function(x){return x.id===$('#sPk').value})[0],ap=store.get('sponApps',[]);ap.push({b:$('#sB').value,pk:pk.id,t:Date.now()});store.set('sponApps',ap);openSheet('<h2 style="font-size:32px">Application received</h2><p style="margin:10px 0">Thank you, '+esc($('#sB').value)+'. We will contact '+esc($('#sC').value)+' about the <b>'+esc(pk.t)+'</b> for the '+SEASON.label+' season.</p><p class="note">Prototype: nothing was sent. Sample prices.</p><button class="btn blk" data-act="close" style="margin-top:12px">Done</button>');f.reset();return}
@@ -502,9 +517,9 @@ VIEWS.players=function(){var sq=VIEWS._sq||'all',tabs=[['all','All']].concat(Obj
   return '<div class="pg"><h1>Players</h1><p>Know the people in the shirt. Tap a player for their story.</p></div><div class="tabs">'+tabs.map(function(t){return '<button class="chip" aria-pressed="'+(t[0]===sq)+'" data-act="sq:'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div><div class="pl">'+PLAYERS.filter(function(p){return sq==='all'||p.sq===sq}).map(playerCard).join('')+'</div><p class="note" style="margin-top:12px">Sample players. Replace with the real squad and photos.</p>'};
 VIEWS.shop=function(){return '<div class="pg"><h1>Shop</h1><p>Every purchase supports the club and makes you a fan.</p></div><button class="drop" data-act="jersey" style="margin-top:6px"><div><span class="tag" style="background:var(--on);color:var(--accent)">Custom</span><h2>Club jersey</h2><p>Your name and number. From '+KES(PRICE.kids)+'.</p><span class="btn">Design it</span></div><div>'+jerseySVG({kit:J.kit,view:'back',uid:'sd',name:J.name||'YOU',num:J.num||'10'})+'</div></button><section class="sec"><div class="sh"><h2>Merchandise</h2></div><div class="mg">'+MERCH.map(function(m){return '<div class="mi"><div class="art">'+merchArt(m.a)+'</div><div class="bd"><h3>'+m.t+'</h3><span class="pr">'+KES(m.p)+'</span><button class="btn sm" data-act="add:'+m.id+'">Add to basket</button></div></div>'}).join('')+'</div></section><p class="note" style="margin-top:12px">Sample products and prices. Orders are batch-printed.</p>'};
 VIEWS.card=function(){
-  if(!FAN)return '<div class="pg"><h1>Fan card</h1><p>Free to join. Get 10% off merch, game-day reminders and a chance to be Fan of the Week.</p></div>'+memberCard(false)+'<form id="fanForm" class="card pad" style="margin-top:14px"><label for="fN" style="margin-top:0">Your name</label><input id="fN" type="text" autocomplete="name" required><label for="fP">Phone number</label><input id="fP" type="tel" inputmode="tel" placeholder="07XX XXX XXX" required><label class="chk"><input type="checkbox" id="fS" checked> Text me game-day reminders and ticket links</label><button class="btn blk" type="submit">Become a fan</button><p class="note" style="margin-top:10px">Prototype: nothing is sent. Your details stay in this browser.</p></form><section class="sec"><div class="sh"><h2>Top fans</h2></div>'+boardHTML()+'</section>';
+  if(!FAN)return '<div class="pg"><h1>Fan card</h1><p>Free to join. Get 10% off merch, game-day reminders and a chance to be Fan of the Week.</p></div>'+memberCard(false)+'<form id="fanForm" class="card pad" style="margin-top:14px"><h3 style="font-size:24px">Log in or become a fan</h3><label for="fP">Phone number</label><input id="fP" type="tel" inputmode="tel" placeholder="07XX XXX XXX" required><label class="chk"><input type="checkbox" id="fS" checked> Text me game-day reminders and when the club needs support</label><button class="btn blk" type="submit">Continue</button><p class="note" style="margin-top:10px">Already a fan? Use the same number to log in. Prototype: no code is sent yet.</p></form><section class="sec"><div class="sh"><h2>Top fans</h2></div>'+boardHTML()+'</section>';
   var jr=FAN.jersey;
-  return '<div class="pg"><h1>My card</h1></div>'+memberCard(true)+'<div class="qa" style="margin-top:14px">'+[['ball','Check in','ci'],['shirt','My shirt',jr?'myshirt':'jersey'],['ticket','Tickets','go:match'],['bell',FAN.sms?'Alerts on':'Alerts off','sms']].map(function(q){return '<button data-act="'+q[2]+'">'+ico(q[0])+q[1]+'</button>'}).join('')+'</div>'+
+  return '<div class="pg"><h1>My card</h1></div>'+memberCard(true)+(hasName()?'':'<form id="nameForm" class="card pad" style="margin-top:14px;display:grid;grid-template-columns:1fr auto;gap:8px"><input id="nmI" type="text" maxlength="40" placeholder="Add your name to the card" aria-label="Your name"><button class="btn sm" type="submit" style="min-height:48px">Save</button></form>')+'<div class="qa" style="margin-top:14px">'+[['ball','Check in','ci'],['shirt','My shirt',jr?'myshirt':'jersey'],['ticket','Tickets','go:match'],['bell',FAN.sms?'Alerts on':'Alerts off','sms']].map(function(q){return '<button data-act="'+q[2]+'">'+ico(q[0])+q[1]+'</button>'}).join('')+'</div>'+
   (jr?'<section class="sec"><div class="sh"><h2>My jersey</h2><button data-act="jersey">Edit</button></div><div class="card pad" style="display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center"><div>'+jerseySVG({kit:jr.kit,view:'back',uid:'my',name:jr.name,num:jr.num})+'</div><div><b>'+esc((jr.name||'No name').toUpperCase())+' '+esc(jr.num||'')+'</b><p class="note" style="margin:4px 0 12px">'+jr.size+' &middot; '+jr.kit+' kit</p><button class="btn sm" data-act="myshirt">Check out my shirt</button></div></div></section>':'')+
   '<section class="sec"><div class="sh"><h2>How to earn points</h2></div><div class="card pad"><div class="cm" style="border:0;grid-template-columns:1fr auto"><span>Check in at a match</span><b>+15</b></div><div class="cm" style="grid-template-columns:1fr auto"><span>Buy a ticket</span><b>+20</b></div><div class="cm" style="grid-template-columns:1fr auto"><span>Buy a shirt</span><b>+30</b></div><div class="cm" style="grid-template-columns:1fr auto"><span>Give to a club fund</span><b>up to +100</b></div><p class="note" style="margin-top:8px">Silver at 100, Gold at 300. Fan of the Week earns a medal.</p></div></section><section class="sec"><div class="sh"><h2>Top fans</h2></div>'+boardHTML()+'</section>'};
 VIEWS.train=function(){var days=[['A','Tue &amp; Thu','16:30'],['B','Wed','16:30'],['U17','Sat','09:00'],['U13','Sat','11:00'],['U10','Sat','13:00']];
@@ -526,53 +541,69 @@ function renderJ(){
   }
   $('#jshirt').innerHTML=h;
   $('#jctl').innerHTML=[['home','Home'],['hoops','Hoops'],['away','Away']].map(function(k){return '<button class="chip" data-act="jk:'+k[0]+'" aria-pressed="'+(J.kit===k[0])+'">'+k[1]+'</button>'}).join('')+'<button class="chip" data-act="jv">'+(back?'See front':'See back')+'</button><select id="jSize" aria-label="Size" style="width:auto;min-height:34px;padding:4px 10px;border-radius:999px;font-size:12px">'+SIZES.map(function(s){return '<option'+(s===J.size?' selected':'')+'>'+s+'</option>'}).join('')+'</select>';
-  $('#jAdd').textContent='Add to cart · '+KES(jPrice(J)-(FAN?Math.round(jPrice(J)*FD):0));
+  $('#jAdd').textContent='Add to cart · '+KES(jPrice(J)-(FAN?Math.round(jPrice(J)*FD):0));$('#jFan').textContent=FAN?'Save to my fan card':'Become a fan';
   var nm=$('#jName'),nu=$('#jNum');
   if(nm){nm.oninput=function(){J.name=cleanName(this.value);this.value=J.name;nm.style.fontSize=Math.min(9.5,Math.floor(150/(Math.max(J.name.length,6)*.56))/3).toFixed(2)+'cqw';store.set('jdraft',J);ss.set('jtyped','1');$('#jAdd').textContent='Add to cart · '+KES(jPrice(J)-(FAN?Math.round(jPrice(J)*FD):0));var p=$('#jshirt .pulse'),hh=$('#jshirt .hint');if(p){p.remove();hh&&hh.remove()}};
     nu.oninput=function(){J.num=cleanNum(this.value);this.value=J.num;store.set('jdraft',J)}}
   $('#jSize').onchange=function(){J.size=this.value;store.set('jdraft',J);renderJ()};
 }
-function openJ(){$('#jwin').hidden=false;document.body.style.overflow='hidden';J.view='back';renderJ();setTimeout(function(){var n=$('#jName');if(n&&!J.name&&window.innerWidth>700)n.focus()},400)}
+function openJ(){$('#jFanBox').hidden=true;$('#jFan').hidden=false;$('#jwin').hidden=false;document.body.style.overflow='hidden';J.view='back';renderJ();setTimeout(function(){var n=$('#jName');if(n&&!J.name&&window.innerWidth>700)n.focus()},400)}
 function closeJ(){if($('#jwin').hidden)return;$('#jwin').hidden=true;document.body.style.overflow='';ss.set('seenPop','1');setTimeout(teaseChat,4000)}
 $('#jClose').onclick=closeJ;$('#jNo').onclick=closeJ;
 $('#jwin').addEventListener('click',function(e){if(e.target===this)closeJ()});
 $('#jAdd').onclick=function(){if(!J.name&&!J.num){toast('Type a name or number first');var n=$('#jName');n&&n.focus();return}closeJ();addItem(shirtItem(J));openCart()};
-$('#jFan').onclick=function(){closeJ();openChat('fan')};
+$('#jFan').onclick=function(){
+  if(FAN){if(J.name||J.num){FAN.jersey={kit:J.kit,name:J.name,num:J.num,size:J.size};saveFan()}closeJ();toast('Saved to your fan card');route();return}
+  $('#jFanBox').hidden=false;$('#jFan').hidden=true;setTimeout(function(){$('#jPhone').focus()},60)};
+$('#jFanBox').addEventListener('submit',function(e){e.preventDefault();var p=$('#jPhone').value;if(!phoneOK(p)){toast('Enter a valid Kenyan number');return}doLogin(p,true,function(isNew){if(J.name||J.num){FAN.jersey={kit:J.kit,name:J.name,num:J.num,size:J.size};if(!hasName()&&J.name)FAN.name=cap(J.name);saveFan()}renderHeader();closeJ();route();toast(isNew?'You are a fan! Jersey saved. We will text you game reminders.':'Welcome back! Jersey saved to your card.')})});
 
 /* ---------- chat bubble ---------- */
 var chatState={step:0,name:''};
 function say(t,u){var m=document.createElement('div');m.className='m'+(u?' u':'');m.textContent=t;$('#chatMs').appendChild(m);$('#chatMs').scrollTop=1e5}
 function opts(a){$('#chatQr').innerHTML=a.map(function(o){return '<button data-chat="'+o[0]+'">'+o[1]+'</button>'}).join('');$('#chatForm').hidden=true}
 function ask(kind){chatState.step=kind;var f=$('#chatForm'),i=$('#chatIn');f.hidden=false;$('#chatQr').innerHTML='';i.type=kind==='name'?'text':'tel';i.placeholder=kind==='name'?'Your name':'07XX XXX XXX';i.value='';i.setAttribute('autocomplete',kind==='name'?'name':'tel');setTimeout(function(){i.focus()},80)}
+function first(){return hasName()?FAN.name.split(' ')[0]:''}
+function askName(){ask('name');$('#chatQr').innerHTML='<button data-chat="skipname">Skip</button>'}
+function chatPitch(){
+  var nf=fixtures()[0];
+  if(!FAN.owns){
+    if(FAN.jersey&&(FAN.jersey.name||FAN.jersey.num)){say('You do not own a club jersey yet, but your '+((FAN.jersey.name||'')+' '+(FAN.jersey.num||'')).trim().toUpperCase()+' shirt is saved. Want to order it?');opts([['myshirt','Order my jersey'],['jersey','Design a new one']])}
+    else{say('You do not have a club jersey yet. Put your name on one for '+KES(PRICE.adult)+'. A share goes to the club.');opts([['jersey','Design my jersey'],['more','Maybe later']])}
+  }else if(nf){say('Good to see you in the colours! Next game: '+(nf.home?CLUB.short+' v '+nf.opp:nf.opp+' v '+CLUB.short)+', '+fmtD(nf.d)+'. A ticket is '+KES(nf.price)+'. Want one?');opts([['ticket','Buy a ticket'],['rem','Remind me'],['more','Maybe later']])}
+  else{say('You already have the shirt. We will tell you as soon as the next game is set.');opts([['more','Thanks']])}
+}
 function chatStart(mode){
-  $('#chatMs').innerHTML='';var nf=fixtures()[0];
-  if(mode==='fan'&&!FAN){say('Great choice! Fans get 10% off merch and game-day reminders. What is your name?');ask('name');return}
-  if(!FAN){say('Hi! Welcome to '+CLUB.name+'. I am the fan desk.');say('Join the fan club for 10% off merch, match-day reminders and ticket links. Or jump straight to your jersey or a ticket.');opts([['fan','Become a fan'],['jersey','Buy a jersey'],['ticket','Buy a ticket']])}
-  else if(FAN.jersey){say('Welcome back, '+FAN.name.split(' ')[0]+'! Your '+(FAN.jersey.name||'club')+' jersey is ready.');if(nf){say('Next up: '+(nf.home?CLUB.short+' v '+nf.opp:nf.opp+' v '+CLUB.short)+', '+fmtD(nf.d)+'. Want the shirt and a ticket together?');opts([['both','Jersey + ticket'],['ticket','Just a ticket'],['myshirt','Just the jersey']])}else{say('Want to check out your shirt?');opts([['myshirt','Check out my jersey']])}}
-  else{say('Welcome back, '+FAN.name.split(' ')[0]+'! You do not have a jersey saved yet.');opts([['jersey','Design my jersey'],['ticket','Buy a ticket']])}
+  $('#chatMs').innerHTML='';
+  if(!FAN){if(mode==='fan'){say('Great! Fans get 10% off merch and game-day reminders. What is your phone number?');ask('phone');return}
+    say('Hi! Welcome to '+CLUB.name+'. Are you already a fan?');opts([['login','Log in with my phone'],['fan','Become a fan'],['jersey','Buy a jersey'],['ticket','Buy a ticket']]);return}
+  if(hasName()){say('Welcome back, '+first()+'!');chatPitch()}else{say('Welcome back! What should I call you?');askName()}
 }
 function openChat(mode){$('#tease').hidden=true;$('#chatDot').hidden=true;$('#chat').hidden=false;chatStart(mode)}
 function teaseChat(){if(!FAN&&$('#chat').hidden&&!ss.get('teased')){ss.set('teased','1');$('#tease').hidden=false;setTimeout(function(){$('#tease').hidden=true},9000)}}
 $('#chatBtn').onclick=function(){if($('#chat').hidden)openChat();else $('#chat').hidden=true};
 $('#chatX').onclick=function(){$('#chat').hidden=true};
 $('#tease').onclick=function(){openChat()};
-$('#chatQr').addEventListener('click',function(e){var b=e.target.closest('[data-chat]');if(!b)return;var k=b.getAttribute('data-chat');say(b.textContent,1);var nf=fixtures()[0];if(!nf&&k==='ticket'){say('No game is scheduled yet. We will tell fans as soon as one is.');return}
-  if(k==='fan'){say('Lovely. What is your name?');ask('name')}
+$('#chatQr').addEventListener('click',function(e){var b=e.target.closest('[data-chat]');if(!b)return;var k=b.getAttribute('data-chat');say(b.textContent,1);var nf=fixtures()[0];
+  if(k==='login'||k==='fan'){say('What is your phone number?');ask('phone')}
+  else if(k==='skipname'){$('#chatForm').hidden=true;chatPitch()}
   else if(k==='jersey'){$('#chat').hidden=true;openJ()}
-  else if(k==='ticket'){addItem(ticketItem(nf));say('Ticket added for '+fmtD(nf.d)+' ('+KES(nf.price)+'). Ready to pay?');opts([['basket','Open basket'],['more','Keep chatting']])}
-  else if(k==='both'){var jr=FAN.jersey;addItem(shirtItem(jr));if(nf)addItem(ticketItem(nf));$('#chat').hidden=true;openCart()}
+  else if(k==='ticket'){if(!nf){say('No game is scheduled yet. We will tell fans as soon as one is.');return}addItem(ticketItem(nf));say('Ticket added for '+fmtD(nf.d)+' ('+KES(nf.price)+'). Ready to pay?');opts([['basket','Open basket'],['more','Keep chatting']])}
+  else if(k==='rem'){if(nf){FAN.rem[nf.id]=true;saveFan();say('Done. We will text you on match day.')}opts([['ticket','Buy a ticket'],['more','Thanks']])}
   else if(k==='myshirt'){$('#chat').hidden=true;addItem(shirtItem(FAN.jersey));openCart()}
   else if(k==='basket'){$('#chat').hidden=true;openCart()}
-  else{say('Anytime. Ask for a jersey or ticket whenever you like.');opts([['jersey','Buy a jersey'],['ticket','Buy a ticket']])}});
+  else{say('Anytime. Ask for a jersey or ticket whenever you like.');opts(FAN&&FAN.owns?[['ticket','Buy a ticket']]:[['jersey','Buy a jersey'],['ticket','Buy a ticket']])}});
 $('#chatForm').addEventListener('submit',function(e){e.preventDefault();var v=$('#chatIn').value.trim();if(!v)return;
-  if(chatState.step==='name'){chatState.name=v.slice(0,40);say(v,1);say('Thanks, '+chatState.name.split(' ')[0]+'. What phone number should we text game-day reminders to?');ask('phone')}
-  else{if(!phoneOK(v)){say('That number looks off. Try 0712 345 678.');return}say(v,1);newFan(chatState.name,v,true,'chat');$('#chatForm').hidden=true;say('You are in! Your fan card is ready'+(FAN.jersey?' and your jersey is saved.':'.')+' Want to grab a ticket for the next game?');opts([['ticket','Buy a ticket'],['basket','Open basket'],['more','Maybe later']]);route()}});
+  if(chatState.step==='name'){FAN.name=v.slice(0,40);saveFan();renderHeader();say(v,1);say('Nice to meet you, '+first()+'.');$('#chatForm').hidden=true;chatPitch();return}
+  if(!phoneOK(v)){say('That number looks off. Try 0712 345 678.');return}
+  say(v,1);$('#chatForm').hidden=true;
+  doLogin(v,true,function(isNew){renderHeader();route();if(hasName()){say((isNew?'You are in! Welcome, ':'Welcome back, ')+first()+'.');chatPitch()}else{say(isNew?'You are in! We will text you game reminders. What should I call you?':'Welcome back! What should I call you?');askName()}})});
 
 /* ---------- actions ---------- */
 var ACT={
+ login:function(){closeSheet();FAN?openAccount():openLogin()},logout:function(){FAN=null;store.set('fan',null);closeSheet();renderHeader();renderTabs();renderTicker();route();toast('Signed out')},
  close:closeSheet,jersey:function(){closeSheet();openJ()},cart:openCart,chat:function(){openChat()},
  ci:function(){var t=new Date().toDateString();if(FAN.last===t){toast('Already checked in today');return}FAN.last=t;FAN.checkins++;addPts(15);route();toast('Checked in. +15 points')},
- sms:function(){FAN.sms=!FAN.sms;store.set('fan',FAN);route();toast(FAN.sms?'Game-day alerts on':'Alerts off')},
+ sms:function(){FAN.sms=!FAN.sms;saveFan();route();toast(FAN.sms?'Game-day alerts on':'Alerts off')},
  myshirt:function(){if(!FAN||!FAN.jersey){openJ();return}addItem(shirtItem(FAN.jersey));openCart()},
  jv:function(){J.view=J.view==='back'?'front':'back';renderJ()}
 };
@@ -582,7 +613,7 @@ function act(a){
   if(k==='go'){closeSheet();location.hash='#'+v;return}
   if(k==='rm'){cart.splice(+v,1);updCart();openCart();return}
   if(k==='tix'){var f=fixtures().filter(function(x){return x.id===v})[0];addItem(ticketItem(f));return}
-  if(k==='rem'){if(!FAN){toast('Join the fan club to get reminders');openChat('fan');return}FAN.rem[v]=!FAN.rem[v];store.set('fan',FAN);route();toast(FAN.rem[v]?'We will text you on match day':'Reminder removed');return}
+  if(k==='rem'){if(!FAN){toast('Join the fan club to get reminders');openChat('fan');return}FAN.rem[v]=!FAN.rem[v];saveFan();route();toast(FAN.rem[v]?'We will text you on match day':'Reminder removed');return}
   if(k==='add'){var m=MERCH.filter(function(x){return x.id===v})[0];addItem({k:'merch',ref:m.id,t:m.t,d:'',price:m.p,disc:true,share:true});return}
   if(k==='jk'){J.kit=v;store.set('jdraft',J);renderJ();return}
   if(k==='nf'){VIEWS._nc=v;route();return}
@@ -599,12 +630,13 @@ document.addEventListener('click',function(e){
   act(b.getAttribute('data-act'))});
 $('#cartBtn').onclick=openCart;$('#homeBtn').onclick=function(){location.hash='#home'};
 
+function openLogin(){openSheet('<h2 style="font-size:32px">Log in or join</h2><p style="color:var(--mut);margin:6px 0">Enter your phone number. We use it to remind you of upcoming games and when the club needs your support.</p><form id="loginForm"><label for="lP">Phone number</label><input id="lP" type="tel" inputmode="tel" placeholder="07XX XXX XXX" required><label class="chk"><input type="checkbox" id="lS" checked> Text me game-day reminders</label><button class="btn blk" type="submit">Continue</button></form><p class="note" style="margin-top:10px">New here? The same step makes you a fan. Prototype: no code is sent yet.</p>');setTimeout(function(){var i=$('#lP');i&&i.focus()},80)}
+function openAccount(){openSheet('<h2 style="font-size:32px">'+esc(hasName()?FAN.name:'My account')+'</h2><p class="note" style="margin:4px 0 14px">'+esc(FAN.phone)+' &middot; '+tier(FAN.points)+' &middot; '+FAN.points+' pts</p><div class="opts"><button class="btn blk" data-go="card">My card</button><button class="btn dk blk" data-act="jersey">'+(FAN.owns?'Order another jersey':'Design my jersey')+'</button><button class="btn dk blk" data-act="logout">Sign out</button></div>')}
+$('#loginBtn').onclick=function(){ACT.login()};
 /* ---------- menu ---------- */
 $('#menuBtn').onclick=function(){
   var items=[['home','Home','home'],['news','News','news'],['match','Matches','ball'],['players','Players','users'],['train','Train','train'],['shop','Shop','shop'],['card','Fan card','card'],['join','Join the club','flag'],['support','Support the club','heart'],['sponsor','Sponsors','star'],['club','About the club','info']];
-  openSheet('<div class="menu">'+items.map(function(i){return '<button data-go="'+i[0]+'">'+ico(i[2])+i[1]+'</button>'}).join('')+'</div><div class="card pad" style="margin-top:14px"><b>Make it your club</b><p class="note" style="margin:6px 0 10px">Upload any crest. The app picks up its colour and re-themes everything, shirts included.</p><input type="file" id="crestIn" accept="image/*" aria-label="Upload crest"> <button class="btn sm dk" id="crestReset" style="margin-top:8px">Reset to Mathaithi</button></div>');
-  $('#crestIn').onchange=function(){var f=this.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas'),s=Math.min(1,160/Math.max(im.width,im.height));c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);var u=c.toDataURL('image/png');setCrest(u)};im.src=r.result};r.readAsDataURL(f)};
-  $('#crestReset').onclick=function(){setCrest('img/crest.png',1)};
+  openSheet('<div class="menu"><button data-act="login">'+ico('user')+(FAN?'My account':'Log in')+'</button>'+items.map(function(i){return '<button data-go="'+i[0]+'">'+ico(i[2])+i[1]+'</button>'}).join('')+'</div>');
 };
 function setCrest(src,reset){themeFromImage(src,function(col){CLUB.crest=src;store.set('crest',reset?null:src);applyTheme(col||'#f6c400');paintCrest();route();renderTabs();toast(col?'Theme updated from your crest':'Crest set (kept the default colour)')})}
 
@@ -623,7 +655,7 @@ function route(){
 window.addEventListener('hashchange',route);
 
 /* ---------- start ---------- */
-function boot(){paintCrest();renderTicker();updCart();
+function boot(){paintCrest();renderTicker();updCart();renderHeader();
   if(CLUB.apiPrimary&&!store.get('crest',null)){applyTheme(CLUB.apiPrimary)}else themeFromImage(CLUB.crest,function(col){applyTheme(col||'#f6c400');paintCrest();route()});
   route();renderTabs();
   if(!ss.get('seenPop'))setTimeout(openJ,1100);else setTimeout(teaseChat,3000)}

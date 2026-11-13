@@ -9,6 +9,7 @@ const uid = (n) => crypto.randomBytes(n || 5).toString('hex');
 const hash = (pw, salt) => crypto.scryptSync(String(pw), salt, 32).toString('hex');
 const mkUser = (username, pw, role, team, name) => { const salt = uid(8); return { id: uid(4), username, salt, hash: hash(pw, salt), role, team: team || null, name }; };
 const DAY = 864e5;
+const normPh = (p) => String(p || '').replace(/\D/g, '').slice(-9);
 
 function seed() {
   const now = Date.now(), sat = (k) => { const d = new Date(now + k * DAY); d.setHours(15, 0, 0, 0); return d.toISOString(); };
@@ -123,9 +124,20 @@ async function api(req, res, u) {
     save(); return send(res, 200, { id: o.id, total: o.total });
   }
   if (p === '/api/fans' && M === 'POST') {
-    const b = await readBody(req, 1e4), t = teamBy(clean(b.team, 30)); if (!t) return send(res, 400, { error: 'unknown team' });
-    const ph = clean(b.phone, 20); if (!DB.fans.some(f => f.team === t.id && f.phone === ph)) { DB.fans.push({ id: uid(4), team: t.id, name: clean(b.name, 60), phone: ph, sms: !!b.sms, at: new Date().toISOString() }); save(); }
-    return send(res, 200, { ok: true });
+    const b = await readBody(req, 2e4), t = teamBy(clean(b.team, 30)); if (!t) return send(res, 400, { error: 'unknown team' });
+    const ph = normPh(b.phone); if (ph.length < 9) return send(res, 400, { error: 'bad phone' });
+    let f = DB.fans.find(x => x.team === t.id && normPh(x.phone) === ph);
+    if (!f) { f = { id: uid(4), team: t.id, phone: clean(b.phone, 20), at: new Date().toISOString() }; DB.fans.push(f); }
+    if (b.name != null) f.name = clean(b.name, 60); f.sms = !!b.sms;
+    if (b.data && typeof b.data === 'object') { const d = JSON.stringify(b.data); if (d.length < 6000) f.blob = b.data; }
+    save(); return send(res, 200, { ok: true });
+  }
+  if (p === '/api/fans/lookup' && M === 'POST') {
+    const b = await readBody(req, 1e4), t = teamBy(clean(b.team, 30)), ph = normPh(b.phone); if (!t || ph.length < 9) return send(res, 400, { error: 'bad request' });
+    const f = DB.fans.find(x => x.team === t.id && normPh(x.phone) === ph); if (!f) return send(res, 200, { found: false });
+    const owns = DB.orders.some(o => o.team === t.id && normPh(o.phone) === ph && o.status !== 'cancelled' && o.items.some(i => i.kind === 'shirt'));
+    const d = Object.assign({}, f.blob || {}); d.name = f.name || d.name || 'Fan'; d.owns = !!(owns || d.owns);
+    return send(res, 200, { found: true, fan: d });
   }
   const me = userOf(req); if (!me) return send(res, 401, { error: 'login required' });
   if (p === '/api/me') return send(res, 200, { name: me.name, role: me.role, team: me.team, username: me.username });
@@ -180,7 +192,7 @@ async function api(req, res, u) {
   const mine = (arr) => arr.filter(x => x.team === team);
   if (p === '/api/admin/summary') return send(res, 200, Object.assign(summary(team), { settings: { share: DB.settings.share, jerseyPrice: DB.settings.jerseyPrice }, payouts: DB.payouts.filter(x => x.team === team).reverse(), team: teamBy(team) }));
   if (p === '/api/admin/orders') return send(res, 200, mine(DB.orders).sort((a, b) => a.at < b.at ? 1 : -1).slice(0, 200));
-  if (p === '/api/admin/fans') return send(res, 200, mine(DB.fans).reverse().slice(0, 200));
+  if (p === '/api/admin/fans') return send(res, 200, mine(DB.fans).slice().reverse().slice(0, 200).map(f => ({ id: f.id, name: f.name || 'Fan', phone: f.phone, sms: f.sms, at: f.at, points: f.blob ? f.blob.points : 0, owns: !!(f.blob && f.blob.owns) })));
   const coll = { matches: DB.matches, posts: DB.posts, gallery: DB.gallery };
   let m = /^\/api\/admin\/(matches|posts|gallery)(?:\/(\w+))?(?:\/(rematch))?$/.exec(p);
   if (m) {
