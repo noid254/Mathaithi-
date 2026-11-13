@@ -276,7 +276,7 @@ var IC={
 var ico=function(n){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+IC[n]+'</svg>'};
 
 /* ---------- club + theme from the crest ---------- */
-var CLUB={name:'Mathaithi United',short:'MU',motto:'Pride of the Community',est:2000,primary:'#f6c400',secondary:'#0b0b0f',crest:store.get('crest','img/crest.png')};
+var CLUB={id:'mathaithi',name:'Mathaithi United',short:'MU',motto:'Pride of the Community',est:2000,primary:'#f6c400',secondary:'#0b0b0f',crest:store.get('crest','img/crest.png')};
 var SEASON={label:'2026/27',chest:null,sleeve:null};
 function lum(h){var n=parseInt(h.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255;return (.299*r+.587*g+.114*b)/255}
 function hex(r,g,b){return '#'+[r,g,b].map(function(v){return ('0'+Math.round(v).toString(16)).slice(-2)}).join('')}
@@ -326,7 +326,7 @@ function jerseySVG(o){
   }
   return s+'</svg>';
 }
-var PRICE={kids:2200,adult:2800},SHARE=.35,TICKET={A:100,B:100,U17:50,U13:50,U10:50};
+var PRICE={kids:1650,adult:1650},SHARE=.35,TSH=.9,FD=.1,TICKET={A:100,B:100,U17:50,U13:50,U10:50};
 var J=store.get('jdraft',{kit:'home',name:'',num:'',size:'M',view:'back'});
 var isKid=function(s){return /^Kids/.test(s)};
 var jPrice=function(j){return isKid(j.size)?PRICE.kids:PRICE.adult};
@@ -381,7 +381,7 @@ function merchArt(k){
 /* fixtures / results / table */
 var OPP=['Kamukunji Kings','Riverside Rovers','Highland Stars','Lakeview FC','Ridge Rangers','Unity Youth','Savannah United'];
 function nextSat(){var d=new Date(),add=(6-d.getDay()+7)%7,t=new Date(d.getFullYear(),d.getMonth(),d.getDate()+add,15,0,0);if(t<=d)t.setDate(t.getDate()+7);return t}
-function fixtures(){var b=nextSat(),sq=['A','U17','B','U13','A','U10'],out=[];
+function fixtures(){if(API){var lim=Date.now()-3*36e5;return API.matches.filter(function(m){return m.status==='fixture'&&new Date(m.date).getTime()>lim}).map(mapM)}var b=nextSat(),sq=['A','U17','B','U13','A','U10'],out=[];
   sq.forEach(function(s,i){var d=new Date(b.getTime()+i*7*864e5);if(s!=='A'&&s!=='B')d.setHours(10);if(s==='B')d.setHours(13);out.push({id:'f'+i,sq:s,opp:OPP[i%OPP.length],d:d,home:i%2===0,price:TICKET[s]})});return out}
 var RESULTS=[['A','Ridge Rangers',2,1,1],['U17','Lakeview FC',3,3,0],['B','Unity Youth',0,1,-1],['U13','Savannah United',4,0,1]];
 function rng(s){return function(){s=(s*1664525+1013904223)%4294967296;return s/4294967296}}
@@ -392,11 +392,22 @@ var fmtD=function(d){return d.toLocaleDateString('en-GB',{weekday:'short',day:'n
 var FAN=store.get('fan',null),cart=[],WALL=store.get('wall',[]);
 var SAMPLE_CM=[{n:'Wanjiru K.',t:'Best atmosphere in the league. See you Saturday!',ago:'1h'},{n:'Brian M.',t:'That late header. Still shaking.',ago:'2d'},{n:'Faith N.',t:'My son loves the Saturday training. Thank you coach!',ago:'3d'}];
 function tier(p){return p>=300?'Gold':p>=100?'Silver':'Bronze'}
-function newFan(name,phone,sms,via){
+function newFan(name,phone,sms,via){try{fetch('/api/fans',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team:CLUB.id,name:name,phone:phone,sms:!!sms})}).catch(function(){})}catch(e){}
   FAN={name:name,no:'MU-'+String(Math.floor(1000+Math.random()*9000)),phone:phone,sms:!!sms,points:25,since:new Date().toISOString(),rem:{},checkins:0,jersey:(J.name||J.num)?{kit:J.kit,name:J.name,num:J.num,size:J.size}:null,via:via};
   store.set('fan',FAN);renderTabs();renderTicker();toast('Welcome to the fan club, '+name.split(' ')[0]+'!')}
 function addPts(n){if(FAN){FAN.points+=n;store.set('fan',FAN)}}
 function barcode(seed){var s=0,r='';for(var i=0;i<seed.length;i++)s=(s*31+seed.charCodeAt(i))%9973;var x=0,g=rng(s+1);while(x<196){var w=1+Math.floor(g()*3);r+='<rect x="'+x+'" y="0" width="'+w+'" height="26" fill="currentColor"/>';x+=w+1+Math.floor(g()*3)}return '<svg class="bc" viewBox="0 0 200 26" preserveAspectRatio="none" aria-hidden="true">'+r+'</svg>'}
+
+/* ---------- live data from the club API (falls back to the sample content above) ---------- */
+var API=null;
+function sqn(x){return SQ[x]||x}
+function mapM(m){return {id:m.id,sq:m.squad,opp:m.opp,d:new Date(m.date),home:m.home,price:m.price,status:m.status,sf:m.sf,sa:m.sa,report:m.report,motm:m.motm,motmWhy:m.motmWhy,scorers:m.scorers,photos:m.photos||[],att:m.att,comp:m.comp}}
+function results(){if(API)return API.matches.filter(function(m){return m.status==='result'}).map(mapM).sort(function(a,b){return b.d-a.d});return RESULTS.map(function(r,i){return {id:'r'+i,sq:r[0],opp:r[1],sf:r[2],sa:r[3],d:new Date(Date.now()-(i+1)*7*864e5),photos:[]}})}
+function relT(iso){var d=Math.floor((Date.now()-new Date(iso))/864e5);return d<1?'Today':d===1?'Yesterday':d<14?d+' days ago':new Date(iso).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+function applyAPI(a){API=a;var t=a.team;CLUB.id=t.id;CLUB.name=t.name;CLUB.short=t.short;CLUB.est=t.est;CLUB.motto=t.motto;CLUB.apiPrimary=t.primary;CLUB.crest=store.get('crest',null)||t.crest;
+  PRICE.kids=PRICE.adult=a.settings.jerseyPrice;SHARE=a.settings.shirtShare/100;FD=a.settings.fanDiscount/100;
+  NEWS=a.posts.map(function(p){return {id:p.id,cat:p.cat,title:p.title,d:relT(p.at),img:p.img||IMG.sup,body:String(p.body||'').split(/\n+/).filter(Boolean)}});
+  MERCH=a.products.map(function(p){return {id:p.id,t:p.title,p:p.price,a:p.art}})}
 
 /* ---------- sheets ---------- */
 function openSheet(html){$('#sheet').innerHTML='<button class="sx" data-act="close" aria-label="Close">&times;</button><div class="grab"></div>'+html;$('#sheetOv').hidden=false;document.body.style.overflow='hidden';$('#sheet').scrollTop=0}
@@ -406,10 +417,11 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeSheet(
 
 /* ---------- cart ---------- */
 function addItem(it){it.qty=1;cart.push(it);updCart();toast('Added to basket')}
-function totals(){var sub=0,disc=0,club=0;cart.forEach(function(i){sub+=i.price;if(i.disc&&FAN)disc+=Math.round(i.price*.1);if(i.share)club+=i.price*SHARE});return {sub:sub,disc:disc,total:sub-disc,club:club}}
+function totals(){var sub=0,disc=0,club=0;cart.forEach(function(i){sub+=i.price;if(i.disc&&FAN)disc+=Math.round(i.price*FD);if(i.share){var dd=(i.disc&&FAN)?Math.round(i.price*FD):0;club+=(i.price-dd)*(i.k==='ticket'?TSH:SHARE)}});return {sub:sub,disc:disc,total:sub-disc,club:club}}
 function updCart(){var n=$('#cartN');n.textContent=cart.length;n.hidden=!cart.length}
-function shirtItem(j){return {t:CLUB.name+' '+j.kit+' shirt',d:(j.name?j.name.toUpperCase():'No name')+' · '+(j.num||'No number')+' · '+j.size,price:jPrice(j),disc:true,share:true}}
-function ticketItem(f){return {t:'Match ticket',d:(f.home?CLUB.short+' v '+f.opp:f.opp+' v '+CLUB.short)+' · '+fmtD(f.d),price:f.price,disc:false,share:true}}
+function shirtItem(j){return {k:'shirt',t:CLUB.name+' '+j.kit+' shirt',d:(j.name?j.name.toUpperCase():'No name')+' · '+(j.num||'No number')+' · '+j.size,price:jPrice(j),disc:true,share:true}}
+function ticketItem(f){return {k:'ticket',ref:f.id,t:'Match ticket',d:(f.home?CLUB.short+' v '+f.opp:f.opp+' v '+CLUB.short)+' · '+fmtD(f.d),price:f.price,disc:false,share:true}}
+function postOrder(nm,ph,fan){try{fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team:CLUB.id,name:nm,phone:ph,fan:fan,items:cart.map(function(i){return {kind:i.k||'merch',ref:i.ref,title:i.t,detail:i.d,price:i.price}})})}).catch(function(){})}catch(e){}}
 function openCart(){
   if(!cart.length){openSheet('<h2 style="font-size:30px">Your basket</h2><p class="note" style="margin:10px 0 16px">Nothing here yet. Start with your jersey or a match ticket.</p><div class="opts"><button class="btn blk" data-act="jersey">Design my jersey</button><button class="btn dk blk" data-go="match">Get a ticket</button></div>');return}
   var t=totals(),h='<h2 style="font-size:30px;margin-bottom:8px">Your basket</h2>';
@@ -418,7 +430,7 @@ function openCart(){
   if(FAN&&t.disc)h+='<div class="cm" style="grid-template-columns:1fr auto"><span class="ok">Fan discount (10%)</span><span class="ok">-'+KES(t.disc)+'</span></div>';
   else if(!FAN)h+='<p class="note">Fans get 10% off shirts and merch. Buying today makes you a fan automatically.</p>';
   h+='<div class="cm" style="grid-template-columns:1fr auto"><b>You pay</b><b style="font-size:22px">'+KES(t.total)+'</b></div>';
-  if(t.club)h+='<p class="note">About '+KES(t.club*.9)+' of this goes to '+esc(CLUB.name)+'.</p>';
+  if(t.club)h+='<p class="note">About '+KES(t.club)+' of this goes to '+esc(CLUB.name)+'.</p>';
   h+='<form id="payForm">'+(FAN?'':'<label for="pN">Your name</label><input id="pN" type="text" required autocomplete="name">')+'<label for="pP">M-Pesa number</label><input id="pP" type="tel" inputmode="tel" placeholder="07XX XXX XXX" value="'+esc(FAN?FAN.phone:'')+'" required>'+(FAN?'':'<label class="chk"><input type="checkbox" id="pS" checked> Text me game-day reminders and ticket links</label>')+'<button class="btn blk" type="submit" style="margin-top:12px">Pay with M-Pesa</button></form><p class="note" id="payMsg" style="margin-top:10px" aria-live="polite">Prototype: no real payment is taken yet.</p>';
   openSheet(h)}
 document.addEventListener('submit',function(e){
@@ -428,9 +440,9 @@ document.addEventListener('submit',function(e){
     if(!nm){m.textContent='Please add your name.';m.style.color='#ff6b6b';return}
     m.style.color='';m.textContent='Check your phone for the M-Pesa prompt...';$('button[type=submit]',f).disabled=true;
     setTimeout(function(){
-      var hadShirt=cart.some(function(i){return /shirt/.test(i.t)}),tickets=cart.filter(function(i){return i.t==='Match ticket'}).length,wasNew=!FAN;
+      var wasFan0=!!FAN;var hadShirt=cart.some(function(i){return /shirt/.test(i.t)}),tickets=cart.filter(function(i){return i.t==='Match ticket'}).length,wasNew=!FAN;
       if(!FAN)newFan(nm,ph,$('#pS')&&$('#pS').checked,'purchase');
-      if(hadShirt&&!FAN.jersey){FAN.jersey={kit:J.kit,name:J.name,num:J.num,size:J.size}}
+      postOrder(nm,ph,wasFan0);if(hadShirt&&!FAN.jersey){FAN.jersey={kit:J.kit,name:J.name,num:J.num,size:J.size}}
       addPts((hadShirt?30:0)+tickets*20+10);store.set('fan',FAN);cart=[];updCart();renderTabs();
       openSheet('<h2 style="font-size:32px">Thank you, '+esc(FAN.name.split(' ')[0])+'</h2><p style="margin:10px 0">Order '+rid(6)+' confirmed.'+(wasNew?' You are now in the fan club. Your card is ready.':' Points added to your card.')+'</p><div class="opts"><button class="btn blk" data-go="card">See my card</button><button class="btn dk blk" data-act="close">Keep browsing</button></div><p class="note" style="margin-top:10px">Prototype: no payment or text message was sent.</p>');
       route()},1800);return}
@@ -449,8 +461,8 @@ function memberCard(big){
   if(!FAN)return '<div class="mc empty"><div><span class="tier" style="background:var(--accent);color:var(--on)">Free</span><h2 style="font-size:32px;margin:12px 0 6px">Get your fan card</h2><p style="color:var(--mut);font-size:14px">10% off merch, game-day reminders and a shot at Fan of the Week.</p></div><button class="btn" data-go="card" style="align-self:flex-start;margin-top:14px">Join the fan club</button></div>';
   var p=FAN.points,t=tier(p),nx=t==='Bronze'?100:t==='Silver'?300:p,lo=t==='Bronze'?0:t==='Silver'?100:300,pct=t==='Gold'?100:Math.round((p-lo)/(nx-lo)*100);
   return '<div class="mc"><div class="r1"><span class="cr">'+crestHTML()+'</span><span class="tier">'+t+'</span></div><div><div class="nm">'+esc(FAN.name)+'</div><div class="no">'+esc(FAN.no)+' &middot; FAN SINCE '+new Date(FAN.since).getFullYear()+'</div><div class="bar"><i style="width:'+pct+'%"></i></div><div class="no" style="display:flex;justify-content:space-between"><span>'+p+' PTS</span><span>'+(t==='Gold'?'TOP TIER':(nx-p)+' TO '+(t==='Bronze'?'SILVER':'GOLD'))+'</span></div>'+(big?barcode(FAN.no):'')+'</div></div>'}
-function fxRow(f){var on=FAN&&FAN.rem&&FAN.rem[f.id];return '<div class="fx"><div class="dt">'+f.d.toLocaleDateString('en-GB',{month:'short'})+'<b>'+f.d.getDate()+'</b></div><div><h4>'+(f.home?esc(CLUB.short)+' v '+esc(f.opp):esc(f.opp)+' v '+esc(CLUB.short))+'</h4><small>'+SQ[f.sq]+' &middot; '+fmtT(f.d)+' &middot; '+(f.home?'Home':'Away')+'</small></div><div class="ac"><button class="btn sm" data-act="tix:'+f.id+'">Ticket '+KES(f.price)+'</button><button class="pill'+(on?' a':'')+'" data-act="rem:'+f.id+'">'+(on?'Reminder on':'Remind me')+'</button></div></div>'}
-function nextMatch(){var f=fixtures()[0];return '<div class="nx"><span class="tag">Next match &middot; '+SQ[f.sq]+'</span><div class="vs"><div class="tm"><div class="cr">'+crestHTML()+'</div>'+esc(CLUB.name)+'</div><div class="vsx">VS</div><div class="tm"><div class="cr"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#3a3a48"/><text x="50" y="62" text-anchor="middle" font-family="Anton" font-size="34" fill="#fff">'+esc(f.opp.split(' ').map(function(w){return w[0]}).join('').slice(0,2))+'</text></svg></div>'+esc(f.opp)+'</div></div><div class="cd" id="cd" data-t="'+f.d.getTime()+'"></div><p style="text-align:center;color:var(--mut);font-size:13px;margin-bottom:14px">'+fmtD(f.d)+' &middot; '+fmtT(f.d)+' &middot; '+(f.home?'Home':'Away')+'</p><button class="btn blk" data-act="tix:'+f.id+'">Buy ticket &middot; '+KES(f.price)+'</button></div>'}
+function fxRow(f){var on=FAN&&FAN.rem&&FAN.rem[f.id];return '<div class="fx"><div class="dt">'+f.d.toLocaleDateString('en-GB',{month:'short'})+'<b>'+f.d.getDate()+'</b></div><div><h4>'+(f.home?esc(CLUB.short)+' v '+esc(f.opp):esc(f.opp)+' v '+esc(CLUB.short))+'</h4><small>'+sqn(f.sq)+' &middot; '+fmtT(f.d)+' &middot; '+(f.home?'Home':'Away')+'</small></div><div class="ac"><button class="btn sm" data-act="tix:'+f.id+'">Ticket '+KES(f.price)+'</button><button class="pill'+(on?' a':'')+'" data-act="rem:'+f.id+'">'+(on?'Reminder on':'Remind me')+'</button></div></div>'}
+function nextMatch(){var f=fixtures()[0];if(!f)return '<div class="card pad"><b>No upcoming match yet</b><p class="note" style="margin-top:4px">New fixtures appear here as soon as the club posts them.</p></div>';return '<div class="nx"><span class="tag">Next match &middot; '+sqn(f.sq)+'</span><div class="vs"><div class="tm"><div class="cr">'+crestHTML()+'</div>'+esc(CLUB.name)+'</div><div class="vsx">VS</div><div class="tm"><div class="cr"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#3a3a48"/><text x="50" y="62" text-anchor="middle" font-family="Anton" font-size="34" fill="#fff">'+esc(f.opp.split(' ').map(function(w){return w[0]}).join('').slice(0,2))+'</text></svg></div>'+esc(f.opp)+'</div></div><div class="cd" id="cd" data-t="'+f.d.getTime()+'"></div><p style="text-align:center;color:var(--mut);font-size:13px;margin-bottom:14px">'+fmtD(f.d)+' &middot; '+fmtT(f.d)+' &middot; '+(f.home?'Home':'Away')+'</p><button class="btn blk" data-act="tix:'+f.id+'">Buy ticket &middot; '+KES(f.price)+'</button></div>'}
 function newsCard(n){return '<button class="nc" data-act="art:'+n.id+'"><img src="'+n.img+'" alt="" loading="lazy"><div><small>'+n.cat+'</small><h3>'+esc(n.title)+'</h3><time>'+n.d+'</time></div></button>'}
 function playerCard(p){return '<button class="pc" data-act="pl:'+p.id+'">'+(p.star?'<span class="star">Rising star</span>':'')+'<div class="ph"><b>'+p.no+'</b>'+jerseySVG({kit:'home',view:'front',uid:'p'+p.id,noText:1})+'</div><div class="pi"><small>'+SQ[p.sq]+' &middot; '+p.pos+'</small><h3>'+esc(p.n)+'</h3></div></button>'}
 function tbl(){var t=table();return '<table class="tbl"><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Pts</th></tr>'+t.map(function(r,i){return '<tr'+(r.n==='Mathaithi United'?' class="me"':'')+'><td>'+(i+1)+'</td><td>'+esc(r.n)+'</td><td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td><b>'+r.pts+'</b></td></tr>'}).join('')+'</table>'}
@@ -459,12 +471,15 @@ function boardHTML(){return '<div class="card board">'+BOARD.map(function(b,i){r
 function cms(){return WALL.concat(SAMPLE_CM).slice(0,6).map(function(c){return '<div class="cm"><div class="av">'+esc(c.n.charAt(0).toUpperCase())+'</div><div><b>'+esc(c.n)+'</b> <small>'+esc(c.ago)+'</small><p>'+esc(c.t)+'</p></div></div>'}).join('')}
 function sponStrip(){var a=[SEASON.chest?'<div class="sp" style="border-style:solid;color:var(--accent)">'+esc(SEASON.chest)+'</div>':'<button class="sp" data-go="sponsor">Your logo here</button>'];for(var i=0;i<5;i++)a.push('<button class="sp" data-go="sponsor">Sponsor spot</button>');var h=a.join('');return '<div class="spons"><div class="tr">'+h+h+'</div></div>'}
 
+function resRow(r){var w=r.sf>r.sa?1:r.sf<r.sa?-1:0;return '<button class="fx" data-act="mr:'+r.id+'" style="grid-template-columns:1fr auto;width:100%;text-align:left"><div><h4>'+esc(CLUB.short)+' '+r.sf+' &ndash; '+r.sa+' '+esc(r.opp)+'</h4><small>'+sqn(r.sq)+' &middot; '+fmtD(r.d)+(r.motm?' &middot; MOTM '+esc(r.motm):'')+'</small></div><span class="pill '+(w>0?'w':w<0?'l':'')+'">'+(w>0?'Win':w<0?'Loss':'Draw')+'</span></button>'}
+function galleryList(){return API&&API.gallery.length?API.gallery.map(function(g){return [g.url,g.caption||'Photo']}):galleryList()}
 VIEWS.home=function(){
-  var f=fixtures(),slides=[
+  var rs=results()[0],slides=[
    {img:IMG.cel,tag:'Matchday',h:'Pride of the Community',p:'Join us this Saturday. Every ticket supports the club.',b:'Get tickets',a:'go:match'},
    {img:IMG.hoops,tag:'Jersey drop',h:'Your name on the shirt',p:'Design it in seconds. Proceeds go to the club.',b:'Design mine',a:'jersey'},
    {img:IMG.jug,tag:'Rising star',h:'Meet the next generation',p:'The youngsters writing the next chapter.',b:'See the squad',a:'go:players'},
    {img:IMG.kick,tag:'Holiday camp',h:'Train with the club',p:'School holiday camps. Ages 6 to 17.',b:'Book a session',a:'go:train'}];
+  if(rs)slides.unshift({img:(rs.photos&&rs.photos[0])||IMG.cel,tag:'Full time',h:CLUB.short+' '+rs.sf+' - '+rs.sa+' '+rs.opp,p:rs.motm?'Player of the match: '+rs.motm+'.':'Read the match report.',b:'Match report',a:'mr:'+rs.id});
   var h='<div class="hero" style="margin:0 -16px"><div class="slides" id="slides">'+slides.map(function(s){return '<div class="slide"><img src="'+s.img+'" alt=""><div class="cp"><span class="tag">'+s.tag+'</span><h2>'+s.h+'</h2><p>'+s.p+'</p><button class="btn" data-act="'+s.a+'">'+s.b+'</button></div></div>'}).join('')+'</div><div class="dots" id="dots">'+slides.map(function(_,i){return '<i'+(i?'':' class="on"')+'></i>'}).join('')+'</div></div>';
   h+='<div class="qa">'+[['ticket','Tickets','go:match'],['shirt','Jersey','jersey'],['train','Train','go:train'],['heart','Support','go:support']].map(function(q){return '<button data-act="'+q[2]+'">'+ico(q[0])+q[1]+'</button>'}).join('')+'</div>';
   h+='<section class="sec"><div class="sh"><h2>My card</h2><button data-go="card">Open</button></div>'+memberCard(false)+'</section>';
@@ -482,7 +497,7 @@ VIEWS.home=function(){
 VIEWS.news=function(){var cats=['All','Match','Academy','Community','Club'],c=VIEWS._nc||'All';
   return '<div class="pg"><h1>News</h1><p>Updates from around the club.</p></div><div class="tabs">'+cats.map(function(k){return '<button class="chip" aria-pressed="'+(k===c)+'" data-act="nf:'+k+'">'+k+'</button>'}).join('')+'</div><div style="display:grid;gap:14px">'+NEWS.filter(function(n){return c==='All'||n.cat===c}).map(function(n){return newsCard(n).replace('class="nc"','class="nc" style="width:100%"')}).join('')+'</div>'};
 VIEWS.match=function(){var f=fixtures();
-  return '<div class="pg"><h1>Matches</h1><p>Tickets support the club. Remind me and we will text you on match day.</p></div>'+nextMatch()+'<section class="sec"><div class="sh"><h2>Fixtures</h2></div><div class="card">'+f.slice(1).map(fxRow).join('')+'</div></section><section class="sec"><div class="sh"><h2>Results</h2></div><div class="card">'+RESULTS.map(function(r){return '<div class="fx" style="grid-template-columns:1fr auto"><div><h4>'+esc(CLUB.short)+' '+r[2]+' &ndash; '+r[3]+' '+esc(r[1])+'</h4><small>'+SQ[r[0]]+'</small></div><span class="pill '+(r[4]>0?'w':r[4]<0?'l':'')+'">'+(r[4]>0?'Win':r[4]<0?'Loss':'Draw')+'</span></div>'}).join('')+'</div></section><section class="sec"><div class="sh"><h2>League table</h2></div><div class="card pad" style="padding:6px 10px">'+tbl()+'</div></section><p class="note" style="margin-top:12px">Sample fixtures and table. Real ones will follow the FKF calendar.</p>'};
+  return '<div class="pg"><h1>Matches</h1><p>Tickets support the club. Remind me and we will text you on match day.</p></div>'+nextMatch()+'<section class="sec"><div class="sh"><h2>Fixtures</h2></div><div class="card">'+f.slice(1).map(fxRow).join('')+'</div></section><section class="sec"><div class="sh"><h2>Results</h2></div><div class="card">'+(results().map(resRow).join('')||'<p class="note pad">No results yet.</p>')+'</div></section><section class="sec"><div class="sh"><h2>League table</h2></div><div class="card pad" style="padding:6px 10px">'+tbl()+'</div></section><p class="note" style="margin-top:12px">Sample fixtures and table. Real ones will follow the FKF calendar.</p>'};
 VIEWS.players=function(){var sq=VIEWS._sq||'all',tabs=[['all','All']].concat(Object.keys(SQ).map(function(k){return [k,SQ[k]]}));
   return '<div class="pg"><h1>Players</h1><p>Know the people in the shirt. Tap a player for their story.</p></div><div class="tabs">'+tabs.map(function(t){return '<button class="chip" aria-pressed="'+(t[0]===sq)+'" data-act="sq:'+t[0]+'">'+t[1]+'</button>'}).join('')+'</div><div class="pl">'+PLAYERS.filter(function(p){return sq==='all'||p.sq===sq}).map(playerCard).join('')+'</div><p class="note" style="margin-top:12px">Sample players. Replace with the real squad and photos.</p>'};
 VIEWS.shop=function(){return '<div class="pg"><h1>Shop</h1><p>Every purchase supports the club and makes you a fan.</p></div><button class="drop" data-act="jersey" style="margin-top:6px"><div><span class="tag" style="background:var(--on);color:var(--accent)">Custom</span><h2>Club jersey</h2><p>Your name and number. From '+KES(PRICE.kids)+'.</p><span class="btn">Design it</span></div><div>'+jerseySVG({kit:J.kit,view:'back',uid:'sd',name:J.name||'YOU',num:J.num||'10'})+'</div></button><section class="sec"><div class="sh"><h2>Merchandise</h2></div><div class="mg">'+MERCH.map(function(m){return '<div class="mi"><div class="art">'+merchArt(m.a)+'</div><div class="bd"><h3>'+m.t+'</h3><span class="pr">'+KES(m.p)+'</span><button class="btn sm" data-act="add:'+m.id+'">Add to basket</button></div></div>'}).join('')+'</div></section><p class="note" style="margin-top:12px">Sample products and prices. Orders are batch-printed.</p>'};
@@ -511,9 +526,9 @@ function renderJ(){
   }
   $('#jshirt').innerHTML=h;
   $('#jctl').innerHTML=[['home','Home'],['hoops','Hoops'],['away','Away']].map(function(k){return '<button class="chip" data-act="jk:'+k[0]+'" aria-pressed="'+(J.kit===k[0])+'">'+k[1]+'</button>'}).join('')+'<button class="chip" data-act="jv">'+(back?'See front':'See back')+'</button><select id="jSize" aria-label="Size" style="width:auto;min-height:34px;padding:4px 10px;border-radius:999px;font-size:12px">'+SIZES.map(function(s){return '<option'+(s===J.size?' selected':'')+'>'+s+'</option>'}).join('')+'</select>';
-  $('#jAdd').textContent='Add to cart · '+KES(jPrice(J)-(FAN?Math.round(jPrice(J)*.1):0));
+  $('#jAdd').textContent='Add to cart · '+KES(jPrice(J)-(FAN?Math.round(jPrice(J)*FD):0));
   var nm=$('#jName'),nu=$('#jNum');
-  if(nm){nm.oninput=function(){J.name=cleanName(this.value);this.value=J.name;nm.style.fontSize=Math.min(9.5,Math.floor(150/(Math.max(J.name.length,6)*.56))/3).toFixed(2)+'cqw';store.set('jdraft',J);ss.set('jtyped','1');$('#jAdd').textContent='Add to cart · '+KES(jPrice(J)-(FAN?Math.round(jPrice(J)*.1):0));var p=$('#jshirt .pulse'),hh=$('#jshirt .hint');if(p){p.remove();hh&&hh.remove()}};
+  if(nm){nm.oninput=function(){J.name=cleanName(this.value);this.value=J.name;nm.style.fontSize=Math.min(9.5,Math.floor(150/(Math.max(J.name.length,6)*.56))/3).toFixed(2)+'cqw';store.set('jdraft',J);ss.set('jtyped','1');$('#jAdd').textContent='Add to cart · '+KES(jPrice(J)-(FAN?Math.round(jPrice(J)*FD):0));var p=$('#jshirt .pulse'),hh=$('#jshirt .hint');if(p){p.remove();hh&&hh.remove()}};
     nu.oninput=function(){J.num=cleanNum(this.value);this.value=J.num;store.set('jdraft',J)}}
   $('#jSize').onchange=function(){J.size=this.value;store.set('jdraft',J);renderJ()};
 }
@@ -533,7 +548,7 @@ function chatStart(mode){
   $('#chatMs').innerHTML='';var nf=fixtures()[0];
   if(mode==='fan'&&!FAN){say('Great choice! Fans get 10% off merch and game-day reminders. What is your name?');ask('name');return}
   if(!FAN){say('Hi! Welcome to '+CLUB.name+'. I am the fan desk.');say('Join the fan club for 10% off merch, match-day reminders and ticket links. Or jump straight to your jersey or a ticket.');opts([['fan','Become a fan'],['jersey','Buy a jersey'],['ticket','Buy a ticket']])}
-  else if(FAN.jersey){say('Welcome back, '+FAN.name.split(' ')[0]+'! Your '+(FAN.jersey.name||'club')+' jersey is ready.');say('Next up: '+(nf.home?CLUB.short+' v '+nf.opp:nf.opp+' v '+CLUB.short)+', '+fmtD(nf.d)+'. Want the shirt and a ticket together?');opts([['both','Jersey + ticket'],['ticket','Just a ticket'],['myshirt','Just the jersey']])}
+  else if(FAN.jersey){say('Welcome back, '+FAN.name.split(' ')[0]+'! Your '+(FAN.jersey.name||'club')+' jersey is ready.');if(nf){say('Next up: '+(nf.home?CLUB.short+' v '+nf.opp:nf.opp+' v '+CLUB.short)+', '+fmtD(nf.d)+'. Want the shirt and a ticket together?');opts([['both','Jersey + ticket'],['ticket','Just a ticket'],['myshirt','Just the jersey']])}else{say('Want to check out your shirt?');opts([['myshirt','Check out my jersey']])}}
   else{say('Welcome back, '+FAN.name.split(' ')[0]+'! You do not have a jersey saved yet.');opts([['jersey','Design my jersey'],['ticket','Buy a ticket']])}
 }
 function openChat(mode){$('#tease').hidden=true;$('#chatDot').hidden=true;$('#chat').hidden=false;chatStart(mode)}
@@ -541,11 +556,11 @@ function teaseChat(){if(!FAN&&$('#chat').hidden&&!ss.get('teased')){ss.set('teas
 $('#chatBtn').onclick=function(){if($('#chat').hidden)openChat();else $('#chat').hidden=true};
 $('#chatX').onclick=function(){$('#chat').hidden=true};
 $('#tease').onclick=function(){openChat()};
-$('#chatQr').addEventListener('click',function(e){var b=e.target.closest('[data-chat]');if(!b)return;var k=b.getAttribute('data-chat');say(b.textContent,1);var nf=fixtures()[0];
+$('#chatQr').addEventListener('click',function(e){var b=e.target.closest('[data-chat]');if(!b)return;var k=b.getAttribute('data-chat');say(b.textContent,1);var nf=fixtures()[0];if(!nf&&k==='ticket'){say('No game is scheduled yet. We will tell fans as soon as one is.');return}
   if(k==='fan'){say('Lovely. What is your name?');ask('name')}
   else if(k==='jersey'){$('#chat').hidden=true;openJ()}
   else if(k==='ticket'){addItem(ticketItem(nf));say('Ticket added for '+fmtD(nf.d)+' ('+KES(nf.price)+'). Ready to pay?');opts([['basket','Open basket'],['more','Keep chatting']])}
-  else if(k==='both'){var jr=FAN.jersey;addItem(shirtItem(jr));addItem(ticketItem(nf));$('#chat').hidden=true;openCart()}
+  else if(k==='both'){var jr=FAN.jersey;addItem(shirtItem(jr));if(nf)addItem(ticketItem(nf));$('#chat').hidden=true;openCart()}
   else if(k==='myshirt'){$('#chat').hidden=true;addItem(shirtItem(FAN.jersey));openCart()}
   else if(k==='basket'){$('#chat').hidden=true;openCart()}
   else{say('Anytime. Ask for a jersey or ticket whenever you like.');opts([['jersey','Buy a jersey'],['ticket','Buy a ticket']])}});
@@ -568,10 +583,11 @@ function act(a){
   if(k==='rm'){cart.splice(+v,1);updCart();openCart();return}
   if(k==='tix'){var f=fixtures().filter(function(x){return x.id===v})[0];addItem(ticketItem(f));return}
   if(k==='rem'){if(!FAN){toast('Join the fan club to get reminders');openChat('fan');return}FAN.rem[v]=!FAN.rem[v];store.set('fan',FAN);route();toast(FAN.rem[v]?'We will text you on match day':'Reminder removed');return}
-  if(k==='add'){var m=MERCH.filter(function(x){return x.id===v})[0];addItem({t:m.t,d:'',price:m.p,disc:true,share:true});return}
+  if(k==='add'){var m=MERCH.filter(function(x){return x.id===v})[0];addItem({k:'merch',ref:m.id,t:m.t,d:'',price:m.p,disc:true,share:true});return}
   if(k==='jk'){J.kit=v;store.set('jdraft',J);renderJ();return}
   if(k==='nf'){VIEWS._nc=v;route();return}
   if(k==='sq'){VIEWS._sq=v;route();return}
+  if(k==='mr'){var r=results().filter(function(x){return x.id===v})[0];if(!r)return;openSheet('<span class="tag">Full time &middot; '+esc(sqn(r.sq))+'</span><h2 style="font-size:40px;margin:8px 0">'+esc(CLUB.short)+' '+r.sf+' &ndash; '+r.sa+' '+esc(r.opp)+'</h2><small style="color:var(--mut)">'+fmtD(r.d)+(r.att?' &middot; '+r.att+' watching':'')+'</small>'+(r.photos&&r.photos[0]?'<div class="art-body"><img src="'+esc(r.photos[0])+'" alt=""></div>':'')+(r.scorers?'<p style="margin-top:10px"><b>Scorers:</b> '+esc(r.scorers)+'</p>':'')+(r.motm?'<div class="card pad" style="margin:12px 0"><span class="tag">Player of the match</span><h3 style="font-size:26px;margin-top:6px">'+esc(r.motm)+'</h3><p class="note">'+esc(r.motmWhy||'')+'</p></div>':'')+(r.report?'<div class="art-body">'+r.report.split(/\n+/).map(function(x){return '<p>'+esc(x)+'</p>'}).join('')+'</div>':'')+(r.photos&&r.photos.length>1?'<div class="mg">'+r.photos.slice(1).map(function(u){return '<img src="'+esc(u)+'" alt="" style="border-radius:12px;aspect-ratio:1;object-fit:cover;width:100%">'}).join('')+'</div>':''));return}
   if(k==='art'){var n=NEWS.filter(function(x){return x.id===v})[0];openSheet('<div class="art-body"><span class="tag">'+n.cat+'</span><h2 style="font-size:32px;margin:6px 0">'+esc(n.title)+'</h2><small style="color:var(--mut)">'+n.d+'</small><img src="'+n.img+'" alt="">'+n.body.map(function(x){return '<p>'+esc(x)+'</p>'}).join('')+'</div>');return}
   if(k==='pl'){var q=PLAYERS.filter(function(x){return x.id===v})[0];openSheet('<div style="display:grid;grid-template-columns:110px 1fr;gap:14px;align-items:center;margin-bottom:12px"><div>'+jerseySVG({kit:'home',view:'back',uid:'pp',name:q.n.split(' ').pop(),num:q.no})+'</div><div>'+(q.star?'<span class="tag">Rising star</span>':'')+'<h2 style="font-size:32px;margin:6px 0">'+esc(q.n)+'</h2><small style="color:var(--mut)">'+SQ[q.sq]+' &middot; '+q.pos+' &middot; age '+q.age+'</small></div></div><div class="cd" style="justify-content:space-around"><div><b>'+q.ap+'</b><small>Apps</small></div><div><b>'+q.g+'</b><small>Goals</small></div><div><b>'+q.a+'</b><small>Assists</small></div></div><p style="color:#d8d8e2">'+esc(q.bio)+'</p><button class="btn blk" data-act="jersey" style="margin-top:14px">Get a '+esc(q.n.split(' ').pop().toUpperCase())+' shirt</button>');return}
   if(k==='give'){var u=FUNDS.filter(function(x){return x.id===v})[0];openSheet('<h2 style="font-size:30px">Give to: '+esc(u.t)+'</h2><form id="giveForm"><label for="gA">Amount (KSh)</label><input id="gA" type="number" min="50" value="500" inputmode="numeric"><label for="gP">M-Pesa number</label><input id="gP" type="tel" inputmode="tel" placeholder="07XX XXX XXX" value="'+esc(FAN?FAN.phone:'')+'" required><button class="btn blk" type="submit" style="margin-top:14px">Give with M-Pesa</button></form><p class="note" id="gMsg" style="margin-top:10px">Prototype: no payment is taken. Paybill 000000 account '+u.acct+' (sample).</p>');return}
@@ -595,7 +611,7 @@ function setCrest(src,reset){themeFromImage(src,function(col){CLUB.crest=src;sto
 /* ---------- tabs, ticker, router ---------- */
 var TABS=[['home','Home','home'],['news','News','news'],['match','Matches','ball'],['shop','Shop','shop'],['card','Card','card']];
 function renderTabs(){var cur=(location.hash||'#home').slice(1);$('#tabs').innerHTML=TABS.map(function(t){return '<button data-go="'+t[0]+'"'+(cur===t[0]?' aria-current="page"':'')+'>'+ico(t[2])+t[1]+'</button>'}).join('')}
-function renderTicker(){var f=fixtures()[0],a=['Next: '+(f.home?CLUB.short+' v '+f.opp:f.opp+' v '+CLUB.short)+', '+fmtD(f.d)+' '+fmtT(f.d),'Fan of the week: '+BOARD[0][0],'Jersey drop: put your name on the shirt','Holiday camp places open',FAN?'Welcome back, '+FAN.name.split(' ')[0]:'Join the fan club: 10% off merch','Season '+SEASON.label+' sponsor spots open'];$('#tk').innerHTML=a.map(function(x){return '<span>'+esc(x)+'</span>'}).join('')}
+function renderTicker(){var f=fixtures()[0],rs=results()[0],a=[];if(f)a.push('Next: '+(f.home?CLUB.short+' v '+f.opp:f.opp+' v '+CLUB.short)+', '+fmtD(f.d)+' '+fmtT(f.d));if(rs)a.push('Full time: '+CLUB.short+' '+rs.sf+'-'+rs.sa+' '+rs.opp+(rs.motm?', MOTM '+rs.motm:''));a.push('Fan of the week: '+BOARD[0][0],'Jersey drop: put your name on the shirt',FAN?'Welcome back, '+FAN.name.split(' ')[0]:'Join the fan club: 10% off merch','Season '+SEASON.label+' sponsor spots open');$('#tk').innerHTML=a.map(function(x){return '<span>'+esc(x)+'</span>'}).join('')}
 var cdT,carT;
 function route(){
   var h=(location.hash||'#home').slice(1);if(!VIEWS[h]||h[0]==='_')h='home';
@@ -607,10 +623,11 @@ function route(){
 window.addEventListener('hashchange',route);
 
 /* ---------- start ---------- */
-paintCrest();renderTicker();updCart();
-themeFromImage(CLUB.crest,function(col){applyTheme(col||'#f6c400');paintCrest();route()});
-route();
-if(!ss.get('seenPop'))setTimeout(openJ,1100);else setTimeout(teaseChat,3000);
+function boot(){paintCrest();renderTicker();updCart();
+  if(CLUB.apiPrimary&&!store.get('crest',null)){applyTheme(CLUB.apiPrimary)}else themeFromImage(CLUB.crest,function(col){applyTheme(col||'#f6c400');paintCrest();route()});
+  route();renderTabs();
+  if(!ss.get('seenPop'))setTimeout(openJ,1100);else setTimeout(teaseChat,3000)}
+fetch('/api/public').then(function(r){return r.ok?r.json():Promise.reject()}).then(applyAPI).catch(function(){}).then(boot);
 })();
 </script>
 </body>
