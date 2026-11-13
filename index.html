@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mathaithi United FC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=DM+Sans:wght@400;500;600;700&family=Fraunces:ital,wght@1,600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a football lifestyle magazine in flat colour. White pages, black rules, solid club-colour blocks,
+   no shadows or gradients. Home is a cover plus features; other views are sections of the same issue. */
+:root{
+  --bg:#ffffff; --paper:#ececec; --ink:#0b0b0b; --on:#ffffff; --muted:#585858; --line:#0b0b0b;
+  --accent:#f6c400; --accent-ink:#0b0b0b; --sec:#0b0b0b; --good:#0a8f4e; --bad:#c62828;
+  --display:'Bricolage Grotesque','Arial Black',system-ui,sans-serif; --body:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --serif:'Fraunces',Georgia,serif;
+  color-scheme:light;
+}
+.dark{--ink:#ffffff;--on:#0b0b0b;--muted:#b9b9b9;--paper:#1c1c1c;--line:#ffffff;background:#0b0b0b;color:#fff}
+.yel{--ink:var(--accent-ink);--on:var(--accent);--muted:rgba(0,0,0,.68);--paper:rgba(0,0,0,.08);--line:var(--accent-ink);background:var(--accent);color:var(--accent-ink)}
+.paper{background:var(--paper)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 var(--body);-webkit-text-size-adjust:100%}
+img{max-width:100%;display:block}
+h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.04em;line-height:.98;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.7rem,10vw,6.2rem)}
+h2{font-size:clamp(1.9rem,5.6vw,3.3rem)}
+h3{font-size:1.3rem;letter-spacing:-.025em;line-height:1.1}
+p{margin:0 0 1em;max-width:62ch}
+a{color:inherit}
+.wrap{max-width:1160px;margin:0 auto;padding:0 20px}
+.sec{padding:56px 0}
+.muted{color:var(--muted)}
+.note{font-size:.88rem;color:var(--muted)}
+.lead{font-size:1.2rem;max-width:52ch}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;box-shadow:0 0 0 5px var(--ink)}
+[hidden]{display:none!important}
+.kick{display:inline-block;background:var(--ink);color:var(--on);padding:4px 10px;font:700 .72rem var(--body);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+.kick.y{background:var(--accent);color:var(--accent-ink)}
+.tag{display:inline-block;padding:3px 9px;font:700 .72rem var(--body);letter-spacing:.08em;text-transform:uppercase;background:var(--paper);color:var(--ink)}
+.sh{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-top:5px solid var(--ink);padding-top:14px;margin-bottom:26px}
+.sh a{font-weight:700;white-space:nowrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;background:var(--ink);color:var(--on);border:2px solid var(--ink);border-radius:0;font:700 .98rem var(--body);text-decoration:none;cursor:pointer;transition:background .12s,color .12s,transform .12s}
+.btn:hover{background:var(--accent);color:var(--accent-ink);border-color:var(--accent-ink)}
+.dark .btn:hover{border-color:var(--accent)}
+.btn:active{transform:translateY(1px)}
+.btn.y{background:var(--accent);color:var(--accent-ink);border-color:var(--accent-ink)}
+.btn.y:hover{background:var(--ink);color:var(--on);border-color:var(--ink)}
+.btn.line{background:transparent;color:var(--ink)}
+.btn.line:hover{background:var(--ink);color:var(--on);border-color:var(--ink)}
+.btn.sm{min-height:40px;padding:0 16px;font-size:.88rem}
+.btn.txt{background:none;border:0;color:var(--muted);text-decoration:underline;min-height:40px;padding:0 6px;font-weight:600}
+.btn.txt:hover{background:none;color:var(--ink)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+
+/* masthead + header */
+.mast{font:600 .76rem var(--body);letter-spacing:.12em;text-transform:uppercase;padding:7px 0}
+.mast .wrap{display:flex;justify-content:space-between;gap:12px}
+.top{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:4px solid var(--ink)}
+.bar{display:flex;align-items:center;gap:10px;height:68px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;line-height:1.05}
+.brand b{font:800 1.12rem var(--display);letter-spacing:-.03em}
+.brand small{display:block;font:600 .66rem var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.crest{display:inline-grid;place-items:center;width:44px;height:44px;flex:none}
+.crest img,.crest svg{width:100%;height:100%;object-fit:contain}
+.crest.lg{width:88px;height:88px}
+.spacer{flex:1}
+#nav{display:none;position:absolute;left:0;right:0;top:72px;background:var(--bg);flex-direction:column;padding:6px 20px 16px;border-bottom:4px solid var(--ink)}
+.top.open #nav{display:flex}
+#nav a,.navbtn{padding:14px 0;font:700 1.15rem var(--display);letter-spacing:-.02em;text-decoration:none;border:0;border-bottom:2px solid var(--paper);background:none;text-align:left;cursor:pointer;color:var(--ink)}
+#nav a[aria-current="page"]{box-shadow:inset 0 -6px 0 var(--accent)}
+.navbtn{color:var(--ink)}
+.chip{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px 0 6px;background:var(--accent);color:var(--accent-ink);border:2px solid var(--ink);font:700 .85rem var(--body);cursor:pointer}
+.chip svg{width:34px;height:36px}
+.chip span{display:none}
+@media(min-width:560px){.chip span{display:inline}}
+@media(min-width:1040px){
+  #nav{display:flex;position:static;flex-direction:row;gap:4px;padding:0;border:0;margin-left:auto}
+  #nav a,.navbtn{padding:8px 11px;font:700 .95rem var(--body);letter-spacing:0;border:0}
+  #menuBtn,.spacer{display:none}
+  .navbtn{background:var(--accent);color:var(--accent-ink)}
+}
+
+/* cover */
+.cover{display:grid;gap:14px;padding-top:20px}
+@media(min-width:900px){.cover{grid-template-columns:1fr 330px}}
+.cover-main{position:relative;background:var(--ink)}
+.cover-main img{width:100%;height:340px;object-fit:cover;object-position:center 30%}
+body:not([data-club="mu"]) .cover-main img{opacity:0}
+body:not([data-club="mu"]) .cover-main{background:var(--sec)}
+.cover-tag{background:var(--accent);color:var(--accent-ink);padding:24px 22px 26px;--ink:var(--accent-ink);--on:var(--accent)}
+.cover-tag p{max-width:46ch;margin:14px 0 0}
+@media(min-width:900px){
+  .cover-main img{height:540px}
+  .cover-tag{position:absolute;left:0;bottom:0;max-width:56%}
+  .cover-tag h1{font-size:clamp(2.6rem,5.4vw,4.4rem)}
+}
+.cover-side{display:grid;gap:10px;align-content:start}
+.teaser{display:flex;gap:14px;align-items:center;padding:16px;background:var(--paper);text-decoration:none;border-left:8px solid var(--ink)}
+.teaser:hover{background:var(--accent);color:var(--accent-ink)}
+.teaser b{display:block;font:800 1.15rem var(--display);letter-spacing:-.03em;line-height:1.1}
+.teaser small{color:var(--muted);font-weight:600}
+.teaser:hover small{color:var(--accent-ink)}
+.teaser svg{width:42px;height:42px;flex:none}
+
+/* next game band */
+.band{padding:34px 0}
+.next{display:grid;gap:18px;align-items:center}
+@media(min-width:860px){.next{grid-template-columns:auto 1fr auto;gap:40px}}
+.vs{display:flex;align-items:center;gap:16px;font:800 clamp(1.2rem,4.5vw,2.1rem) var(--display);letter-spacing:-.03em;line-height:1.05}
+.vs .crest{width:64px;height:64px}
+.vs .crest.ghost{border:3px solid var(--ink);border-radius:50%;font-size:1.2rem;display:grid;place-items:center}
+.cdn{font:800 clamp(2rem,8vw,3.6rem) var(--display);letter-spacing:-.05em;font-variant-numeric:tabular-nums;line-height:1}
+.cdn small{display:block;font:600 .85rem var(--body);letter-spacing:0;margin-top:6px}
+
+/* fixtures + table */
+.two{display:grid;gap:36px}
+@media(min-width:900px){.two{grid-template-columns:1.1fr .9fr}}
+.fx{display:grid;grid-template-columns:62px 1fr;gap:6px 14px;align-items:center;padding:14px 0;border-bottom:2px solid var(--ink)}
+.fx .fxb{grid-column:1 / -1;display:flex;gap:8px;flex-wrap:wrap}
+@media(min-width:620px){.fx{grid-template-columns:62px 1fr auto}.fx .fxb{grid-column:auto}}
+.dt{background:var(--ink);color:var(--on);text-align:center;padding:8px 0 7px;line-height:1}
+.dt b{display:block;font:800 1.7rem var(--display);letter-spacing:-.04em}
+.dt span{font:700 .7rem var(--body);letter-spacing:.12em;text-transform:uppercase}
+.tblw{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.95rem}
+.tbl th{background:var(--ink);color:var(--on);font:700 .72rem var(--body);letter-spacing:.1em;text-transform:uppercase;text-align:right;padding:9px 8px}
+.tbl th:nth-child(2),.tbl td:nth-child(2){text-align:left}
+.tbl td{padding:10px 8px;text-align:right;border-bottom:1px solid #cfcfcf}
+.tbl tr.me td{background:var(--accent);color:var(--accent-ink);font-weight:700;border-color:var(--accent-ink)}
+.tbl td:first-child,.tbl th:first-child{text-align:center;width:36px}
+.tbl .pts{font-weight:800}
+.fm{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:2px;color:#fff;font:700 .68rem var(--body)}
+.fm.W{background:var(--good)}.fm.D{background:#777}.fm.L{background:var(--bad)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{min-height:40px;padding:0 14px;background:var(--bg);color:var(--ink);border:2px solid var(--ink);font:700 .85rem var(--body);cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--on)}
+.res{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 0;border-bottom:2px solid var(--ink)}
+.res .sc{font:800 1.4rem var(--display);letter-spacing:-.03em}
+.badge{display:inline-block;width:24px;height:24px;text-align:center;line-height:24px;color:#fff;font:700 .75rem var(--body);margin-right:8px}
+.badge.W{background:var(--good)}.badge.D{background:#777}.badge.L{background:var(--bad)}
+
+/* shirt drop + studio */
+.drop{display:grid;gap:28px;align-items:center}
+@media(min-width:860px){.drop{grid-template-columns:1fr 1fr;gap:48px}}
+.stage{position:relative;background:var(--paper);display:grid;place-items:center;padding:26px 12px;overflow:hidden}
+.stage::before{content:"";position:absolute;width:74%;aspect-ratio:1;background:var(--bg);border-radius:50%}
+.stage>*{position:relative}
+.stage svg{width:min(100%,360px);height:auto}
+.field{margin-bottom:16px}
+label,.lab{display:block;font:700 .85rem var(--body);letter-spacing:.04em;margin-bottom:6px}
+input,select,textarea{width:100%;background:var(--bg);color:var(--ink);border:2px solid var(--ink);border-radius:0;padding:12px 14px;font:inherit;min-height:50px}
+input:focus,select:focus,textarea:focus{outline:3px solid var(--accent);outline-offset:0}
+textarea{min-height:104px;resize:vertical}
+.row{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{min-height:42px;padding:0 16px;background:var(--bg);color:var(--ink);border:2px solid var(--ink);font:700 .88rem var(--body);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--on)}
+.dark .seg button{background:transparent}
+.dark .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.kits{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kit{background:var(--bg);border:2px solid var(--ink);padding:6px 4px 8px;color:var(--ink);cursor:pointer;font:700 .82rem var(--body)}
+.kit svg{width:100%;height:auto}
+.kit[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.sumrows{margin:14px 0}
+.sumrows div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:2px solid var(--ink);font-variant-numeric:tabular-nums}
+.sumrows .big{font:800 1.5rem var(--display);letter-spacing:-.03em}
+.share{background:var(--accent);color:var(--accent-ink);padding:12px 14px;font-weight:700}
+.check{display:flex;gap:12px;align-items:flex-start;margin:12px 0}
+.check input{width:22px;min-height:22px;height:22px;margin-top:2px;flex:none;accent-color:var(--ink)}
+.check label{font-weight:500;font-size:.97rem;letter-spacing:0;margin:0}
+.panel{background:var(--bg);border:3px solid var(--ink);padding:24px}
+.hint{font-size:.88rem;color:var(--muted);margin-top:6px}
+.msg{padding:13px 16px;margin:14px 0;border-left:8px solid var(--ink);background:var(--paper)}
+.msg.ok{border-color:var(--good)}.msg.err{border-color:var(--bad)}
+
+/* coach word */
+.coach{display:grid;gap:0;align-items:stretch}
+@media(min-width:860px){.coach{grid-template-columns:.9fr 1.1fr}}
+.coach img{width:100%;height:100%;min-height:320px;object-fit:cover;object-position:center 35%}
+.quote{padding:34px 26px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.quote blockquote{margin:0;font:italic 600 clamp(1.5rem,4.4vw,2.4rem)/1.2 var(--serif);letter-spacing:-.01em}
+.quote cite{font:700 .9rem var(--body);font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+
+/* photo grid */
+.mas{columns:2 160px;column-gap:10px}
+@media(min-width:780px){.mas{columns:3}}
+.mas figure{margin:0 0 10px;break-inside:avoid;position:relative}
+.mas button{display:block;width:100%;padding:0;border:0;background:var(--ink);cursor:zoom-in;color:inherit;text-align:left;position:relative}
+.mas img{width:100%;height:auto;transition:opacity .15s}
+.mas button:hover img{opacity:.82}
+.mas figcaption{position:absolute;left:0;bottom:0;background:var(--ink);color:var(--on);padding:5px 12px;font:700 .78rem var(--body);letter-spacing:.04em}
+.lb{position:fixed;inset:0;background:#0b0b0b;display:none;place-items:center;z-index:100;padding:16px}
+.lb.open{display:grid}
+.lb figure{margin:0;text-align:center;color:#fff}
+.lb img{max-height:78vh;width:auto;max-width:100%;margin:0 auto;object-fit:contain}
+.lb figcaption{margin-top:12px;font-weight:700}
+.lb .btn{position:absolute;top:14px;right:14px}
+
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:var(--paper);padding:22px;display:flex;flex-direction:column;gap:12px}
+.card p{margin:0;color:var(--muted)}
+.card.dk{background:#0b0b0b;color:#fff;--ink:#fff;--on:#0b0b0b;--muted:#b9b9b9}
+.card .meta{font:700 .76rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.star{background:var(--accent);color:var(--accent-ink);--muted:rgba(0,0,0,.68)}
+.star svg{width:100%;height:150px;background:var(--ink)}
+.stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stats3 div{background:rgba(0,0,0,.1);padding:8px;text-align:center;line-height:1.1}
+.stats3 b{display:block;font:800 1.3rem var(--display)}
+.stats3 span{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.split{display:grid;gap:28px;align-items:center}
+@media(min-width:820px){.split{grid-template-columns:1fr 1fr;gap:48px}}
+.tl{list-style:none;margin:0;padding:0;border-left:5px solid var(--ink)}
+.tl li{padding:0 0 24px 24px;position:relative}
+.tl li::before{content:"";position:absolute;left:-15px;top:4px;width:25px;height:25px;background:var(--accent);border:4px solid var(--ink)}
+.tl b{font:800 1.6rem var(--display);letter-spacing:-.04em;display:block;line-height:1.1}
+.cabinet{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.medal{background:var(--paper);padding:18px 10px;text-align:center}
+.medal svg{width:64px;height:auto;margin:0 auto 6px}
+.medal b{display:block;font:800 1rem var(--display)}
+.medal span{font-size:.82rem;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+
+/* fans */
+.fancard{background:#0b0b0b;color:#fff;--ink:#fff;--on:#0b0b0b;--muted:#b9b9b9;padding:22px;position:relative;max-width:430px;border-top:14px solid var(--accent)}
+.fancard .crest{position:absolute;right:18px;top:18px;width:60px;height:60px}
+.fancard .no{font:700 .76rem var(--body);letter-spacing:.16em;color:var(--muted);margin:0}
+.fancard h3{font-size:1.9rem;margin:16px 0 10px;max-width:70%;overflow-wrap:anywhere;color:var(--accent)}
+.fancard .code{background:var(--accent);color:var(--accent-ink);display:inline-block;padding:4px 12px;font-weight:800;letter-spacing:.08em;font-size:.85rem}
+.fancard .pts{display:flex;justify-content:space-between;align-items:flex-end;margin-top:26px;gap:12px}
+.fancard .pts b{font:800 2.8rem var(--display);letter-spacing:-.05em;color:var(--accent);line-height:1}
+.fancard .jr{display:flex;align-items:center;gap:12px;background:#1c1c1c;padding:10px;margin-top:16px}
+.fancard .jr svg{width:44px;height:48px;flex:none}
+.board{list-style:none;margin:0;padding:0;border:3px solid var(--ink)}
+.board li{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:13px 16px;border-bottom:2px solid var(--ink)}
+.board li:last-child{border-bottom:0}
+.board li:first-child{background:var(--accent);color:var(--accent-ink)}
+.board li.me{background:var(--paper)}
+.board .rk{font:800 1.3rem var(--display);text-align:center}
+.board svg{width:32px;height:auto;margin:0 auto}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.rule{background:var(--paper);padding:15px 16px;display:flex;justify-content:space-between;gap:10px;align-items:center;font-weight:600}
+.rule b{font:800 1.3rem var(--display);white-space:nowrap}
+.wall{display:grid;gap:10px}
+.cm{display:grid;grid-template-columns:44px 1fr auto;gap:12px;padding:16px;background:var(--paper)}
+.av{width:44px;height:44px;background:var(--ink);color:var(--on);display:grid;place-items:center;font:800 1.1rem var(--display)}
+.cm p{margin:2px 0 0}
+.cm small{color:var(--muted);font-weight:600}
+.clap{align-self:start;min-height:36px;padding:0 12px;background:var(--bg);border:2px solid var(--ink);font:700 .85rem var(--body);cursor:pointer;color:var(--ink)}
+.clap[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.poll button{display:block;width:100%;text-align:left;margin-bottom:8px;padding:0;border:2px solid var(--ink);background:var(--bg);cursor:pointer;color:var(--ink);position:relative;min-height:48px}
+.poll button i{position:absolute;left:0;top:0;bottom:0;background:var(--accent)}
+.poll button span{position:relative;display:flex;justify-content:space-between;padding:12px 14px;font-weight:700}
+.poll button[disabled]{cursor:default}
+
+/* products + support + basket */
+.art{height:170px;display:grid;place-items:center;background:var(--bg);overflow:hidden;position:relative}
+.art svg{height:140px;width:auto}
+.scarf{width:62px;height:132px;background:repeating-linear-gradient(0deg,var(--accent) 0 16px,var(--sec) 16px 32px);transform:rotate(8deg)}
+.flagart{width:170px;height:112px;display:grid;place-items:center;background:var(--sec)}
+.flagart::before{content:"";position:absolute;width:170px;height:112px;background:linear-gradient(135deg,transparent 0 38%,var(--accent) 38% 62%,transparent 62%)}
+.flagart .crest{position:relative;width:70px;height:70px}
+.price{font:800 1.4rem var(--display);letter-spacing:-.03em}
+.prodrow{display:flex;gap:10px;align-items:center;margin-top:auto}
+.prodrow select{width:auto;min-width:84px;min-height:42px;padding:6px 10px}
+.prog{height:16px;background:rgba(0,0,0,.14);border:2px solid var(--ink)}
+.prog i{display:block;height:100%;background:var(--ink)}
+.amts{display:flex;gap:8px;flex-wrap:wrap}
+.paybox{border:3px dashed var(--ink);padding:22px}
+.paybox dl{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;margin:0 0 14px}
+.paybox dt{font:700 .76rem var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);align-self:center}
+.paybox dd{margin:0;font:800 1.5rem var(--display);letter-spacing:-.03em}
+.line{display:grid;grid-template-columns:1fr auto;gap:6px 12px;padding:16px 0;border-bottom:2px solid var(--ink)}
+.line .rm{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;padding:0;justify-self:start}
+.ready{display:flex;align-items:center;gap:14px;background:var(--accent);color:var(--accent-ink);padding:14px;margin-bottom:18px}
+.ready svg{width:48px;height:52px;flex:none}
+.ready div{flex:1}
+
+/* page heads, footer, toast */
+.pagehead{padding:46px 0 34px;border-bottom:5px solid var(--ink)}
+.pagehead h1{font-size:clamp(2.4rem,8.5vw,5rem);max-width:14ch}
+.pagehead .lead{margin-top:16px;color:var(--muted)}
+footer{margin-top:60px;padding:50px 0 44px}
+footer .cols{display:grid;gap:30px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+footer h3{font:700 .76rem var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+footer a{display:block;padding:4px 0;text-decoration:none}
+footer a:hover{color:var(--accent)}
+footer .brand{display:flex}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);border:2px solid #0b0b0b;padding:12px 20px;font-weight:700;z-index:300;opacity:0;pointer-events:none;transition:opacity .15s;max-width:92vw;text-align:center}
+.toast.show{opacity:1}
+
+/* shirt pop-up */
+.modal{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:14px;background:rgba(11,11,11,.78);overflow:auto}
+.mcard{position:relative;background:var(--bg);color:var(--ink);border:4px solid #0b0b0b;max-width:860px;width:100%;display:grid;animation:pop .25s ease-out}
+@media(min-width:780px){.mcard{grid-template-columns:1fr 1fr}}
+@keyframes pop{from{opacity:0;transform:translateY(14px)}}
+@media(prefers-reduced-motion:reduce){.mcard{animation:none}html{scroll-behavior:auto}}
+.mstage{background:var(--accent);display:grid;place-items:center;padding:20px 12px;position:relative;overflow:hidden}
+.mstage::before{content:"";position:absolute;width:80%;aspect-ratio:1;background:#fff;border-radius:50%}
+.mstage svg{position:relative;width:auto;height:150px}
+.mbody .mlead{display:none}
+@media(min-width:780px){.mstage svg{width:min(88%,330px);height:auto}.mstage{padding:30px 16px}.mbody .mlead{display:block}}
+.mbody{padding:24px 22px 22px}
+.mbody h2{font-size:clamp(1.6rem,4.5vw,2.3rem);margin-bottom:8px}
+.mbody .mlead{color:var(--muted);margin-bottom:16px}
+.mx{position:absolute;top:8px;right:8px;z-index:3;width:42px;height:42px;border:2px solid #0b0b0b;background:#fff;color:#0b0b0b;font-size:1.4rem;line-height:1;cursor:pointer}
+.msum{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px;margin:6px 0 16px;font-weight:700}
+.msum span:last-child{color:var(--muted);font-weight:600}
+.mbtns{display:grid;gap:8px}
+.mbtns .sub{display:flex;justify-content:center}
+.nextbox{background:var(--accent);color:var(--accent-ink);padding:14px 16px;margin-bottom:14px;font-weight:700}
+</style>
+</head>
+<body data-club="mu">
+
+<div class="mast dark"><div class="wrap"><span>Matchday magazine</span><span id="mastDate"></span></div></div>
+<header class="top" id="top">
+  <div class="wrap bar">
+    <a href="#home" class="brand"><span class="crest" data-crest></span><span><b data-cn>Mathaithi United</b><small>Football club</small></span></a>
+    <span class="spacer"></span>
+    <nav id="nav" aria-label="Main">
+      <a href="#home" data-nav="home">Home</a>
+      <a href="#matchday" data-nav="matchday">Matchday</a>
+      <a href="#club" data-nav="club">The club</a>
+      <a href="#fans" data-nav="fans">Fans</a>
+      <a href="#shop" data-nav="shop">Shop</a>
+      <a href="#enrol" data-nav="enrol">Enrol</a>
+      <a href="#support" data-nav="support">Support</a>
+      <button type="button" class="navbtn" id="navShirt">Design your shirt</button>
+    </nav>
+    <button type="button" class="chip" id="myShirt" hidden aria-label="Check out my saved shirt"><span id="myShirtIcon"></span><span id="myShirtTxt">My shirt</span></button>
+    <a class="btn sm" href="#basket" id="basketLink">Basket&nbsp;<b id="cartN">0</b></a>
+    <button id="menuBtn" class="btn sm line" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+  </div>
+</header>
+
+<main>
+
+<!-- HOME -->
+<section class="view" id="v-home">
+  <div class="wrap cover">
+    <div class="cover-main">
+      <img src="img/celebration.jpg" alt="Mathaithi United players celebrating together in yellow and black kit">
+      <div class="cover-tag">
+        <span class="kick">Cover story</span>
+        <h1 data-motto>Pride of the community</h1>
+        <p>Since <span data-est>2000</span>, <span data-cn>Mathaithi United</span> has kept football close to home. Five squads, holiday camps and mentorship for young players.</p>
+        <div class="cta"><a class="btn" href="#enrol">Enrol a player</a><button class="btn line" type="button" id="coverShirt">Design your shirt</button></div>
+      </div>
+    </div>
+    <aside class="cover-side" aria-label="Inside this issue">
+      <a class="teaser" href="#matchday"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#fff" stroke="#0b0b0b" stroke-width="3"/><path d="M20 11l7 5-2.7 8h-8.6L13 16z" fill="#0b0b0b"/></svg><span><b>Standings and fixtures</b><small>Who we play next</small></span></a>
+      <a class="teaser" href="#club"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="#0b0b0b"/><path d="M10 28V14l10 8 10-8v14" fill="none" stroke="#f6c400" stroke-width="4"/></svg><span><b>The coach's word</b><small>Straight from the touchline</small></span></a>
+      <a class="teaser" href="#fans"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#f6c400" stroke="#0b0b0b" stroke-width="3"/><path d="M20 10l3 7 7 .8-5.3 4.8 1.6 7.2L20 26l-6.3 3.8 1.6-7.2L10 17.8l7-.8z" fill="#0b0b0b"/></svg><span><b>Top fan of the week</b><small>Points, medals, bragging rights</small></span></a>
+      <a class="teaser" href="#support"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="#f6c400"/><path d="M6 26h22l6 4v4H6z" fill="#0b0b0b"/><path d="M6 26V12h10v8z" fill="#0b0b0b"/></svg><span><b>Boots for the juniors</b><small>Help a young player play</small></span></a>
+    </aside>
+  </div>
+
+  <div class="band yel" style="margin-top:36px"><div class="wrap next">
+    <div><span class="kick">Next game</span><div class="cdn"><span id="cd">--</span><small id="kick">Kick-off</small></div></div>
+    <div class="vs"><span class="crest" data-crest></span><span data-cn>Mathaithi United</span><span>v</span><span class="crest ghost">OF</span><span>Opponent A</span></div>
+    <div class="cta" style="margin:0"><button class="btn" type="button" id="heroTicket">Buy a ticket</button><button class="btn line" type="button" id="heroRemind">Remind me</button></div>
+  </div></div>
+
+  <div class="wrap sec">
+    <div class="two">
+      <div><div class="sh"><h2>Coming up</h2><a href="#matchday">All fixtures</a></div><div id="fixHome"></div><p class="note" style="margin-top:10px">Sample fixtures. Tickets support the club.</p></div>
+      <div><div class="sh"><h2>Table</h2><a href="#matchday">Full table</a></div><div class="tblw" id="tblHome"></div><p class="note" style="margin-top:10px">Team A, sample table.</p></div>
+    </div>
+  </div>
+
+  <div class="paper sec"><div class="wrap drop">
+    <div class="stage"><div id="homeStage"></div></div>
+    <div>
+      <span class="kick y">Shirt drop</span>
+      <h2>Your name on our shirt</h2>
+      <p class="lead" style="margin:14px 0 18px">Type a name and see it on the back. Every shirt raises money for the club.</p>
+      <div class="row"><div class="field"><label for="hName">Name</label><input id="hName" maxlength="12" autocomplete="off" placeholder="Your name"></div>
+        <div class="field"><label for="hNum">Number</label><input id="hNum" maxlength="2" inputmode="numeric" autocomplete="off" placeholder="10"></div></div>
+      <div class="cta" style="margin-top:4px"><button class="btn y" type="button" id="hAdd">Add to cart</button><button class="btn" type="button" id="hFan">Become a fan</button></div>
+      <p class="note" style="margin-top:12px">Fans get 10% off, match-day reminders and a shirt that is always ready to check out.</p>
+    </div>
+  </div></div>
+
+  <div class="dark"><div class="wrap coach">
+    <img src="img/tactics.jpg" alt="A coach explaining tactics with a magnetic board to players" loading="lazy">
+    <div class="quote">
+      <span class="kick y">Coach's word</span>
+      <blockquote>Lorem ipsum dolor sit amet, consectetur adipiscing elit. We play for the people who stand on the touchline.</blockquote>
+      <cite>Coach name, head coach (placeholder)</cite>
+      <p class="muted" style="margin:0">Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+    </div>
+  </div></div>
+
+  <div class="wrap sec">
+    <div class="sh"><h2>From the touchline</h2><a href="#club">Full gallery</a></div>
+    <div class="mas" id="masHome"></div>
+  </div>
+
+  <div class="paper sec"><div class="wrap">
+    <div class="sh"><h2>Fan zone</h2><a href="#fans">Join in</a></div>
+    <div class="two" style="gap:28px">
+      <div>
+        <div class="card dk"><span class="kick y" style="align-self:flex-start">Top fan of the week</span><h2 id="fotwName" style="color:var(--accent)">--</h2><p id="fotwPts"></p><a class="btn y sm" href="#fans" style="align-self:flex-start">See the leaderboard</a></div>
+        <div class="card" style="margin-top:14px"><span class="kick" style="align-self:flex-start">Poll</span><h3>Player of the match</h3><div class="poll" id="poll"></div><p class="note">Sample poll. One vote each.</p></div>
+      </div>
+      <div><h3 style="margin-bottom:14px">What fans are saying</h3><div class="wall" id="wallHome"></div><a class="btn line sm" href="#fans" style="margin-top:12px">Add your comment</a></div>
+    </div>
+  </div></div>
+
+  <div class="wrap sec">
+    <div class="sh"><h2>Rising stars</h2><a href="#club">All squads</a></div>
+    <div class="cards" id="starHome"></div>
+  </div>
+
+  <div class="yel sec"><div class="wrap split">
+    <div><span class="kick">Support the club</span><h2>Boots for the U10s</h2><p class="lead" style="margin-top:14px">A pair of boots for every player in the Under 10 squad. Give once or give often.</p></div>
+    <div><div class="prog" role="img" aria-label="Boots fund progress"><i id="homeProg" style="width:30%"></i></div><p id="homeProgTxt" style="margin:10px 0 14px;font-weight:700"></p><div class="amts" id="homeGive"></div><a class="btn sm" href="#support" style="margin-top:14px">More ways to help</a></div>
+  </div></div>
+</section>
+
+<!-- MATCHDAY -->
+<section class="view" id="v-matchday" hidden>
+  <div class="wrap pagehead"><span class="kick">Matchday</span><h1>Fixtures, results and tables</h1><p class="lead">Local league football on the FKF calendar. Sample data until the club connects its real fixtures.</p></div>
+  <div class="wrap sec">
+    <div class="two">
+      <div>
+        <div class="sh"><h2>Upcoming</h2></div>
+        <div class="tabs" id="fxTabs"></div>
+        <div id="fxList"></div>
+      </div>
+      <div>
+        <div class="sh"><h2>League table</h2></div>
+        <div class="tabs" id="tblTabs"></div>
+        <div class="tblw" id="tblFull"></div>
+        <div class="sh" style="margin-top:36px"><h2>Latest results</h2></div>
+        <div id="resList"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLUB -->
+<section class="view" id="v-club" hidden>
+  <div class="wrap pagehead"><span class="kick">The club</span><h1>Pride of the community</h1><p class="lead">Founded in <span data-est>2000</span>. Still local, still ours.</p></div>
+  <div class="wrap sec">
+    <div class="split">
+      <div><h2>Our story</h2><p class="lead" style="margin:14px 0">Mathaithi United began in <span data-est>2000</span> and is still a local club at heart. We play, we mentor young players and we run programmes in every school holiday.</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet.</p></div>
+      <div><img src="img/bus.jpg" alt="The yellow and black Mathaithi United club bus" loading="lazy"></div>
+    </div>
+  </div>
+  <div class="paper sec"><div class="wrap">
+    <div class="sh"><h2>Milestones</h2></div>
+    <ul class="tl">
+      <li><b>2000</b><strong>The club is founded</strong><p class="muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p></li>
+      <li><b>Year</b><strong>Milestone placeholder</strong><p class="muted">Add a league title, cup run or promotion.</p></li>
+      <li><b>Year</b><strong>Milestone placeholder</strong><p class="muted">Add the year the youth squads started.</p></li>
+      <li><b>Year</b><strong>Milestone placeholder</strong><p class="muted">Add the first holiday camp or the club bus.</p></li>
+    </ul>
+  </div></div>
+  <div class="wrap sec">
+    <div class="sh"><h2>Squads</h2></div>
+    <div class="cards" id="teamCards"></div>
+  </div>
+  <div class="paper sec"><div class="wrap">
+    <div class="sh"><h2>Rising stars</h2></div>
+    <p class="muted" style="margin-bottom:18px">Coaches nominate one young player a month. Names and photos appear only with a parent's consent. Sample profiles.</p>
+    <div class="cards" id="starClub"></div>
+  </div></div>
+  <div class="wrap sec">
+    <div class="sh"><h2>Gallery</h2></div>
+    <div class="chips tabs" id="galChips"></div>
+    <div class="mas" id="gal"></div>
+  </div>
+  <div class="wrap" style="padding-bottom:30px">
+    <div class="sh"><h2>Trophy cabinet</h2></div>
+    <p class="muted" style="margin-bottom:16px">Placeholders. Add each title, medal or award with its year.</p>
+    <div class="cabinet" id="cabinet"></div>
+  </div>
+  <div class="wrap sec">
+    <div class="split" style="align-items:start">
+      <div><h2>Talk to the club</h2><p class="lead" style="margin-top:14px">Phone: 07xx xxx xxx (placeholder)<br>Email: club@example.com (placeholder)<br>Home ground: to be confirmed</p></div>
+      <form class="panel" id="contactForm" novalidate>
+        <div class="field"><label for="cName">Name</label><input id="cName" required></div>
+        <div class="field"><label for="cPh">Phone or email</label><input id="cPh" required></div>
+        <div class="field"><label for="cMsg">Message</label><textarea id="cMsg" required></textarea></div>
+        <div id="contactMsg" role="status"></div>
+        <button class="btn" type="submit">Send message</button>
+        <p class="note" style="margin-top:10px">Prototype: nothing is sent yet.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- FANS -->
+<section class="view" id="v-fans" hidden>
+  <div class="wrap pagehead"><span class="kick">Fan club</span><h1>Be the twelfth man</h1><p class="lead">Match-day reminders, 10% off merch, a shirt that is always ready to check out, and a shot at Top Fan of the week.</p></div>
+  <div class="wrap sec">
+    <div class="split" style="align-items:start">
+      <div>
+        <form class="panel" id="fanForm" novalidate>
+          <h3 style="margin-bottom:14px">Become a fan</h3>
+          <div class="field"><label for="fName">Your name</label><input id="fName" required autocomplete="off"></div>
+          <div class="field"><label for="fPhone">Phone number</label><input id="fPhone" type="tel" inputmode="tel" required placeholder="07xx xxx xxx"></div>
+          <div class="check"><input type="checkbox" id="fSms"><label for="fSms">Text me before match days, with a link to buy a ticket. I can opt out any time.</label></div>
+          <div id="fanMsg" role="status"></div>
+          <button class="btn y" type="submit">Join the fan club</button>
+        </form>
+        <div id="fanCardBox" hidden>
+          <div class="fancard">
+            <span class="crest" data-crest></span>
+            <p class="no">FAN CARD <span id="fcNo"></span></p>
+            <h3 id="fcName"></h3>
+            <span class="code" id="fcCode"></span>
+            <div class="jr" id="fcJersey"></div>
+            <div class="pts"><div><span class="note">Points</span><br><b id="fcPts">0</b></div><div id="fcBadges" class="note" style="text-align:right"></div></div>
+          </div>
+          <div class="cta"><button class="btn y" id="checkinBtn" type="button">Check in at the match (+10)</button><button class="btn line" id="signoutBtn" type="button">Leave fan club</button></div>
+          <p class="note" style="margin-top:10px">Demo: one check-in a day here. In the live site a steward confirms check-ins at the ground.</p>
+        </div>
+      </div>
+      <div>
+        <div class="sh"><h2>Top fans</h2></div>
+        <p class="note" style="margin-bottom:12px">Sample data. Points from the last 7 days.</p>
+        <ul class="board" id="board"></ul>
+      </div>
+    </div>
+    <div style="margin-top:46px"><div class="sh"><h2>How to earn points</h2></div>
+      <div class="rules">
+        <div class="rule"><span>Check in at a match</span><b>+10</b></div>
+        <div class="rule"><span>Bring a friend who joins</span><b>+15</b></div>
+        <div class="rule"><span>Help on match day</span><b>+20</b></div>
+        <div class="rule"><span>Buy merch, per KSh 100</span><b>+1</b></div>
+        <div class="rule"><span>Give, per KSh 50</span><b>+1</b></div>
+      </div>
+      <p class="note" style="margin-top:12px">Points from money are capped at 100 a week, so showing up counts as much as spending. The weekly winner gets a Top Fan medal, a shout-out and a prize from a local sponsor.</p>
+    </div>
+    <div style="margin-top:46px" class="two">
+      <div><div class="sh"><h2>Fan wall</h2></div>
+        <form id="wallForm" class="panel" style="margin-bottom:14px" novalidate>
+          <div class="row"><div class="field"><label for="wName">Name</label><input id="wName" maxlength="24" autocomplete="off"></div></div>
+          <div class="field"><label for="wText">Your comment</label><textarea id="wText" maxlength="240" placeholder="Tell us about Saturday"></textarea></div>
+          <button class="btn" type="submit">Post comment</button>
+        </form>
+        <div class="wall" id="wallFull"></div></div>
+      <div><div class="sh"><h2>Man of the match</h2></div><div class="card"><div class="poll" id="poll2"></div><p class="note">Sample poll. One vote each.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOP -->
+<section class="view" id="v-shop" hidden>
+  <div class="wrap pagehead"><span class="kick">Club shop</span><h1>Wear the colours</h1><p class="lead">Every item sold raises money for <span data-cn>Mathaithi United</span>. Buying makes you a fan.</p></div>
+  <div class="wrap sec">
+    <div class="drop" style="align-items:start">
+      <div><div class="stage"><div id="shopStage"></div></div>
+        <div class="seg" style="margin-top:10px;justify-content:center"><button type="button" id="vFront" aria-pressed="false">Front</button><button type="button" id="vBack" aria-pressed="true">Back</button></div></div>
+      <div>
+        <h2 style="margin-bottom:18px">Design your shirt</h2>
+        <div class="field"><span class="lab">Kit</span><div class="kits" id="kitPick"></div></div>
+        <div class="row">
+          <div class="field"><label for="sName">Name on back</label><input id="sName" maxlength="12" autocomplete="off" placeholder="Your name"></div>
+          <div class="field"><label for="sNum">Number</label><input id="sNum" maxlength="2" inputmode="numeric" autocomplete="off" placeholder="10"></div>
+        </div>
+        <div class="field"><label for="sSize">Size</label>
+          <select id="sSize"><optgroup label="Kids"><option>Kids S</option><option>Kids M</option><option>Kids L</option></optgroup><optgroup label="Adults"><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>XXL</option></optgroup></select></div>
+        <div class="sumrows" id="sum"></div>
+        <div class="share" id="share"></div>
+        <div class="cta"><button class="btn y" id="addShirt" type="button">Add to cart</button><button class="btn" id="shopFan" type="button">Become a fan</button></div>
+        <p class="note" style="margin-top:10px">Sample prices. Shirts are printed in batches, so delivery takes a few weeks.</p>
+      </div>
+    </div>
+  </div>
+  <div class="paper sec"><div class="wrap">
+    <div class="sh"><h2>More gear</h2></div>
+    <div class="cards" id="merch"></div>
+  </div></div>
+  <div class="wrap sec"><div class="split"><img src="img/hoops.jpg" alt="A player in the yellow and black hooped shirt" loading="lazy" style="max-height:460px;width:100%;object-fit:cover;object-position:center 20%"><div><span class="kick y">Hoops kit</span><h2>Worn by the team, made for the stands</h2><p class="lead" style="margin-top:14px">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pick the home, hoops or away shirt and add your name.</p></div></div></div>
+</section>
+
+<!-- BASKET -->
+<section class="view" id="v-basket" hidden>
+  <div class="wrap pagehead"><span class="kick">Checkout</span><h1>Your basket</h1></div>
+  <div class="wrap sec">
+    <div class="panel" style="max-width:660px">
+      <div id="readyBox"></div>
+      <div id="cartList"></div>
+      <div class="sumrows" id="cartSum"></div>
+      <div id="payMsg" role="status"></div>
+      <div id="payBox">
+        <div class="field"><label for="payPhone">M-Pesa phone number</label><input id="payPhone" type="tel" inputmode="tel" placeholder="07xx xxx xxx"></div>
+        <div class="check" id="paySmsBox"><input type="checkbox" id="paySms"><label for="paySms">Also text me before match days, with a ticket link.</label></div>
+        <button class="btn y" id="payBtn" type="button">Pay with M-Pesa</button>
+        <p class="note" style="margin-top:10px"><span class="tag">Demo</span> No money moves. Paying also makes you a fan, with your shirt saved for next time. The live site sends an M-Pesa prompt to your phone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENROL -->
+<section class="view" id="v-enrol" hidden>
+  <div class="wrap pagehead"><span class="kick">Join the club</span><h1>Enrol to play</h1><p class="lead">Players of every age are welcome. Parents can enrol a child in weekly training, holiday camps or a squad trial.</p></div>
+  <div class="wrap sec">
+    <div class="split" style="align-items:start">
+      <form class="panel" id="enrolForm" novalidate>
+        <div class="field"><span class="lab">Who is joining?</span>
+          <div class="seg"><button type="button" id="mChild" aria-pressed="true">My child</button><button type="button" id="mSelf" aria-pressed="false">Me (18+)</button></div></div>
+        <div class="row">
+          <div class="field"><label for="eFirst">Player first name</label><input id="eFirst" required autocomplete="off"></div>
+          <div class="field"><label for="eLast">Player surname</label><input id="eLast" required autocomplete="off"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="eDob">Date of birth</label><input id="eDob" type="date" required></div>
+          <div class="field"><label for="eSquad">Squad</label>
+            <select id="eSquad"><option>Under 10</option><option>Under 13</option><option>Under 17</option><option>Team B</option><option>Team A</option></select>
+            <div class="hint" id="squadHint">Pick a date of birth for a suggestion. The coach confirms the squad.</div></div>
+        </div>
+        <div class="field"><span class="lab">What are you joining?</span>
+          <div class="check"><input type="checkbox" id="pTrain" checked><label for="pTrain">Weekly training</label></div>
+          <div class="check"><input type="checkbox" id="pCamp"><label for="pCamp">School holiday camp</label></div>
+          <div class="check"><input type="checkbox" id="pTrial"><label for="pTrial">Squad trial for the league</label></div></div>
+        <div id="parentBox"><div class="row">
+          <div class="field"><label for="gName">Parent or guardian name</label><input id="gName" required autocomplete="off"></div>
+          <div class="field"><label for="gPhone">Parent phone</label><input id="gPhone" type="tel" inputmode="tel" required placeholder="07xx xxx xxx"></div>
+        </div></div>
+        <div class="field" id="selfPhoneBox" hidden><label for="sPhone">Your phone</label><input id="sPhone" type="tel" inputmode="tel" placeholder="07xx xxx xxx"></div>
+        <div class="field"><label for="eMed">Medical notes for the coach (optional)</label><textarea id="eMed" placeholder="Allergies, asthma, anything the coach should know"></textarea></div>
+        <div class="check" id="cGuardWrap"><input type="checkbox" id="cGuard" required><label for="cGuard">I am the parent or legal guardian and I consent to my child taking part in club activities.</label></div>
+        <div class="check"><input type="checkbox" id="cCode" required><label for="cCode">I accept the club's safeguarding code of conduct.</label></div>
+        <div class="check"><input type="checkbox" id="cPhoto"><label for="cPhoto">Optional: photos and video may be used on the club website and social media.</label></div>
+        <div id="enrolMsg" role="status"></div>
+        <button class="btn y" type="submit">Submit enrolment</button>
+        <p class="note" style="margin-top:12px">Prototype: nothing is sent yet. Birth certificate and school letter are collected in person at registration, not online.</p>
+      </form>
+      <div>
+        <h2>How it works</h2>
+        <ul class="tl" style="margin-top:24px">
+          <li><b>1</b><strong>Send the form</strong><p class="muted">We confirm by SMS within a few days.</p></li>
+          <li><b>2</b><strong>Come to a trial session</strong><p class="muted">Bring boots and water. Coaches place players in the right squad.</p></li>
+          <li><b>3</b><strong>Register in person</strong><p class="muted">Bring documents. Fees and kit are explained then.</p></li>
+        </ul>
+        <img src="img/juggle.jpg" alt="A coach controlling a ball during a warm-up" loading="lazy" style="max-height:340px;width:100%;object-fit:cover;object-position:center 30%">
+      </div>
+    </div>
+    <div style="margin-top:46px"><div class="sh"><h2>Programmes</h2></div>
+      <div class="cards">
+        <div class="card"><span class="meta">April, August, December</span><h3>Holiday camps</h3><p>Football, games and life skills while schools are closed. Dates to be confirmed.</p></div>
+        <div class="card"><span class="meta">Weekly</span><h3>Training</h3><p>Sessions by age group with qualified coaches. Days and times to be confirmed.</p></div>
+        <div class="card"><span class="meta">Per FKF calendar</span><h3>League football</h3><p>Teams A and B and the youth squads play in local leagues across the season.</p></div>
+        <div class="card"><span class="meta">Always on</span><h3>Mentorship</h3><p>Older players and coaches guide younger ones on and off the pitch.</p></div>
+      </div></div>
+  </div>
+</section>
+
+<!-- SUPPORT -->
+<section class="view" id="v-support" hidden>
+  <div class="wrap pagehead"><span class="kick">Support the club</span><h1>Help a young player play</h1><p class="lead">Boots, uniforms and camp places cost money many families do not have. Give once or give often.</p></div>
+  <div class="wrap sec"><div class="cards" id="funds"></div><p class="note" style="margin-top:12px">Amounts raised are sample figures.</p></div>
+  <div class="paper sec"><div class="wrap split" style="align-items:start">
+    <div class="paybox">
+      <span class="kick">Pay by M-Pesa Paybill</span>
+      <dl><dt>Paybill</dt><dd>000000</dd><dt>Account</dt><dd id="acctNo">BOOTS</dd></dl>
+      <p class="note">Placeholder number. Pick a fund above, then use its account name when you pay at the M-Pesa menu.</p>
+      <button class="btn line sm" id="copyPay" type="button">Copy paybill details</button>
+    </div>
+    <div><h2>Give kit in person</h2><p style="margin-top:14px">Clean used boots, shin guards, bibs and jerseys are welcome. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p><p class="muted">Collection point and drop-off times to be confirmed.</p></div>
+  </div></div>
+  <div class="wrap sec"><div class="sh"><h2>Business sponsors</h2></div>
+    <div class="cards">
+      <div class="card"><span class="meta">Bronze</span><h3>Camp partner</h3><p>Your name on holiday camp bibs.</p></div>
+      <div class="card"><span class="meta">Silver</span><h3>Match-day partner</h3><p>Banner at the ground and a Top Fan prize.</p></div>
+      <div class="card dk"><span class="meta">Gold</span><h3>Shirt partner</h3><p>Your logo on the club shirt and on this site.</p></div>
+    </div></div>
+</section>
+
+</main>
+
+<footer class="dark">
+  <div class="wrap">
+    <div class="cols">
+      <div><a href="#home" class="brand" style="margin-bottom:10px"><span class="crest" data-crest></span><span><b data-cn>Mathaithi United</b></span></a><p class="muted" data-motto>Pride of the community</p></div>
+      <div><h3>Read</h3><a href="#matchday">Matchday</a><a href="#club">The club</a><a href="#fans">Fans</a></div>
+      <div><h3>Get involved</h3><a href="#enrol">Enrol</a><a href="#shop">Shop</a><a href="#support">Support</a></div>
+      <div><h3>Engine preview</h3><p class="note">This site runs on a club-in-a-box engine. Try another club's colours and shirt.</p><div class="seg" id="clubSwitch"></div></div>
+    </div>
+    <p class="note" style="margin-top:28px">Photos of children are shown only with a parent's consent. Prototype with sample content.</p>
+  </div>
+</footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer"><button class="btn sm line" id="lbClose" type="button" style="color:#fff;border-color:#fff">Close</button><figure><img id="lbImg" alt=""><figcaption id="lbCap"></figcaption></figure></div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" hidden>
+  <div class="mcard">
+    <button class="mx" id="mClose" type="button" aria-label="Close">&times;</button>
+    <div class="mstage"><div id="mStage"></div></div>
+    <div class="mbody">
+      <div id="mStep1">
+        <span class="kick y" id="mEyebrow">Welcome</span>
+        <h2 id="mTitle">Put your name on the shirt</h2>
+        <p class="mlead" id="mLead"></p>
+        <div class="row">
+          <div class="field"><label for="mName">Name</label><input id="mName" maxlength="12" autocomplete="off" placeholder="Your name"></div>
+          <div class="field"><label for="mNum">Number</label><input id="mNum" maxlength="2" inputmode="numeric" autocomplete="off" placeholder="10"></div>
+        </div>
+        <div class="field"><span class="lab">Kit</span><div class="seg" id="mKits"></div></div>
+        <div class="msum" id="mSum"></div>
+        <div class="mbtns">
+          <button class="btn y" id="mAdd" type="button">Add to cart</button>
+          <button class="btn" id="mFan" type="button">Become a fan</button>
+          <div class="sub"><button class="btn txt" id="mNo" type="button">No thanks</button></div>
+        </div>
+      </div>
+      <div id="mStep2" hidden>
+        <span class="kick y">Fan club</span>
+        <h2>Become a fan</h2>
+        <p class="mlead">We keep your shirt ready to check out, remind you before game days and send a link to buy a ticket.</p>
+        <div class="field"><label for="mFName">Your name</label><input id="mFName" autocomplete="name" maxlength="24"></div>
+        <div class="field"><label for="mPhone">Phone number</label><input id="mPhone" type="tel" inputmode="tel" placeholder="07xx xxx xxx" autocomplete="tel"></div>
+        <div class="check"><input type="checkbox" id="mConsent"><label for="mConsent">Yes, text me before match days and about my saved shirt. I can opt out any time.</label></div>
+        <div id="mMsg" role="status"></div>
+        <div class="mbtns">
+          <button class="btn y" id="mSave" type="button">Join and save my shirt</button>
+          <div class="sub"><button class="btn txt" id="mBack" type="button">Back to my shirt</button></div>
+        </div>
+      </div>
+      <div id="mStep3" hidden>
+        <span class="kick y">You are in</span>
+        <h2>Welcome to the fan club</h2>
+        <p class="mlead" id="mSavedTxt"></p>
+        <div class="nextbox" id="mNext"></div>
+        <div class="mbtns">
+          <button class="btn y" id="mTicket" type="button">Buy a ticket to support the club</button>
+          <button class="btn" id="mCheckout" type="button">Check out my shirt</button>
+          <div class="sub"><button class="btn txt" id="mDone" type="button">Keep browsing</button></div>
+        </div>
+        <p class="note" style="margin-top:12px">Prototype: no text message is sent yet.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)}, $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+var store={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function ssGet(k){try{return sessionStorage.getItem(k)}catch(e){return null}}
+function ssSet(k,v){try{sessionStorage.setItem(k,v)}catch(e){}}
+var KES=function(n){return 'KSh '+Math.round(n).toLocaleString('en-US')};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var toastT;function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show')},2800)}
+var rid=function(){return Math.random().toString(36).slice(2,6).toUpperCase()};
+var phoneOK=function(v){return /^(?:\+?254|0)?[71]\d{8}$/.test(String(v).replace(/[\s\-]/g,''))};
+var cleanName=function(v){return v.replace(/[^A-Za-z0-9 .'\-]/g,'').slice(0,12)};
+var cleanNum=function(v){return v.replace(/\D/g,'').slice(0,2)};
+
+/* ---------- club config (the engine's tenant record) ---------- */
+var CLUBS={
+  mu:{name:'Mathaithi United',short:'MU',motto:'Pride of the community',est:2000,primary:'#f6c400',secondary:'#0b0b0b',ink:'#0b0b0b',crest:'img/crest.png',label:'Mathaithi'},
+  rr:{name:'Riverside Rovers',short:'RR',motto:'Sample club motto',est:2011,primary:'#1fa463',secondary:'#0d1b2a',ink:'#06130c',crest:null,label:'Sample green'},
+  hs:{name:'Highland Stars',short:'HS',motto:'Sample club motto',est:2008,primary:'#e3262f',secondary:'#ffffff',ink:'#ffffff',crest:null,label:'Sample red'}
+};
+var clubKey='mu';
+var club=function(){return CLUBS[clubKey]};
+function crestHTML(c){
+  if(c.crest)return '<img src="'+c.crest+'" alt="">';
+  return '<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="45" fill="'+c.primary+'" stroke="'+c.secondary+'" stroke-width="7"/><text x="50" y="63" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="36" fill="'+c.secondary+'">'+c.short+'</text></svg>';
+}
+
+/* ---------- flat jersey generator (inline SVG) ---------- */
+function jerseySVG(o){
+  var c=o.club,kit=o.kit,view=o.view,uid=o.uid,base,trim,txt,hoops=false,diag=false;
+  if(kit==='away'){base=c.secondary;trim=c.primary;txt=c.primary;diag=true}
+  else{base=c.primary;trim=c.secondary;txt=c.secondary;hoops=(kit==='hoops')}
+  var neck=view==='back'?'Q150 40':'Q150 66';
+  var body='M100 22 L62 36 L8 86 L44 122 L72 100 L72 300 L228 300 L228 100 L256 122 L292 86 L238 36 L200 22 '+neck+' 100 22 Z';
+  var s='<svg viewBox="0 0 300 320" role="img" aria-label="'+esc(c.name)+' '+kit+' shirt, '+view+'">';
+  s+='<defs><clipPath id="cp'+uid+'"><path d="'+body+'"/></clipPath><pattern id="dg'+uid+'" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="5" height="16" fill="'+trim+'" opacity=".4"/></pattern></defs>';
+  s+='<path d="'+body+'" fill="'+base+'"/><g clip-path="url(#cp'+uid+')">';
+  if(hoops){[126,184,242].forEach(function(y){s+='<rect x="0" y="'+y+'" width="300" height="30" fill="'+trim+'"/>'})}
+  if(diag){s+='<rect width="300" height="320" fill="url(#dg'+uid+')"/>'}
+  s+='<polygon points="8,86 44,122 56,110 20,74" fill="'+trim+'"/><polygon points="292,86 256,122 244,110 280,74" fill="'+trim+'"/><rect x="72" y="292" width="156" height="8" fill="'+trim+'"/></g>';
+  s+='<path d="M100 22 '+neck+' 200 22" fill="none" stroke="'+trim+'" stroke-width="9"/><path d="'+body+'" fill="none" stroke="rgba(128,128,128,.6)" stroke-width="2"/>';
+  if(view==='front'){
+    if(c.crest)s+='<image href="'+c.crest+'" x="196" y="62" width="36" height="36"/>';
+    else s+='<circle cx="214" cy="80" r="17" fill="'+trim+'"/><text x="214" y="86" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="15" fill="'+base+'">'+c.short+'</text>';
+    if(!o.plain)s+='<text x="150" y="170" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="15" letter-spacing="3" fill="'+txt+'" stroke="'+base+'" stroke-width="3" paint-order="stroke" opacity=".9">SPONSOR HERE</text>';
+  }else{
+    var nm=(o.name||'YOUR NAME').toUpperCase(),nu=(o.num===''||o.num==null)?'10':String(o.num);
+    var fs=Math.min(30,Math.floor(150/(nm.length*.56)));
+    s+='<text x="150" y="98" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="'+fs+'" letter-spacing="1" fill="'+txt+'" stroke="'+base+'" stroke-width="3" paint-order="stroke">'+esc(nm)+'</text>';
+    s+='<text x="150" y="208" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="118" fill="'+txt+'" stroke="'+base+'" stroke-width="5" paint-order="stroke">'+esc(nu)+'</text>';
+  }
+  return s+'</svg>';
+}
+function miniShirt(j,uid){return jerseySVG({club:club(),kit:j.kit,name:j.name,num:j.num,view:'front',uid:uid,plain:true})}
+
+/* ---------- state ---------- */
+var J={kit:'home',name:'',num:'',size:'M',view:'back'};
+var cart=[];
+var FAN=store.get('fan',null);
+var FUNDS=[
+  {id:'boots',title:'Boots for the U10s',acct:'BOOTS',target:60000,raised:18500,desc:'A pair of boots for every player in the Under 10 squad. Lorem ipsum dolor sit amet.'},
+  {id:'kit',title:'Training uniforms',acct:'UNIFORM',target:90000,raised:42000,desc:'Bibs, shirts and shorts so every child trains in the club colours.'},
+  {id:'camp',title:'Holiday camp places',acct:'CAMP',target:120000,raised:31000,desc:'Sponsor a child through a full school holiday camp.'},
+  {id:'bus',title:'Match-day bus',acct:'BUS',target:45000,raised:9000,desc:'Fuel and upkeep so the team and fans reach away games together.'}
+];
+var BOARD=[['Wanjiru K.',186],['Brian M.',152],['Faith N.',131],['Kamau J.',97],['Achieng O.',64],['Mwangi P.',41]];
+var PRICE={kids:2200,adult:2800},SHARE=.35;
+var isKid=function(s){return /^Kids/.test(s)};
+var shirtPrice=function(){return isKid(J.size)?PRICE.kids:PRICE.adult};
+
+/* ---------- apply club ---------- */
+function applyClub(k){
+  clubKey=k;var c=club(),r=document.documentElement.style;
+  r.setProperty('--accent',c.primary);r.setProperty('--accent-ink',c.ink);r.setProperty('--sec',c.secondary);
+  document.body.setAttribute('data-club',k);
+  $$('[data-cn]').forEach(function(e){e.textContent=c.name});
+  $$('[data-est]').forEach(function(e){e.textContent=c.est});
+  $$('[data-motto]').forEach(function(e){e.textContent=c.motto});
+  $$('[data-crest]').forEach(function(e){e.innerHTML=crestHTML(c)});
+  document.title=c.name+' FC';
+  renderJersey();renderMerch();renderSwitch();renderFixtures();renderTables();renderChip();renderFan();
+}
+function renderSwitch(){
+  $('#clubSwitch').innerHTML=Object.keys(CLUBS).map(function(k){return '<button type="button" data-k="'+k+'" aria-pressed="'+(k===clubKey)+'">'+esc(CLUBS[k].label)+'</button>'}).join('');
+  $$('#clubSwitch button').forEach(function(b){b.onclick=function(){applyClub(b.getAttribute('data-k'))}});
+}
+
+/* ---------- jersey rendering ---------- */
+function renderJersey(){
+  var c=club();
+  $('#homeStage').innerHTML=jerseySVG({club:c,kit:J.kit,name:J.name,num:J.num,view:'back',uid:'h'});
+  $('#shopStage').innerHTML=jerseySVG({club:c,kit:J.kit,name:J.name,num:J.num,view:J.view,uid:'s'});
+  $('#kitPick').innerHTML=[['home','Home'],['hoops','Hoops'],['away','Away']].map(function(k){
+    return '<button type="button" class="kit" data-kit="'+k[0]+'" aria-pressed="'+(J.kit===k[0])+'">'+jerseySVG({club:c,kit:k[0],name:'',num:'',view:'front',uid:'k'+k[0],plain:true})+k[1]+'</button>'}).join('');
+  $$('#kitPick .kit').forEach(function(b){b.onclick=function(){J.kit=b.getAttribute('data-kit');renderJersey()}});
+  $('#vFront').setAttribute('aria-pressed',J.view==='front');$('#vBack').setAttribute('aria-pressed',J.view==='back');
+  var p=shirtPrice(),d=FAN?Math.round(p*.1):0,total=p-d;
+  var h='<div><span>Shirt, '+esc(J.size)+'</span><span>'+KES(p)+'</span></div>';
+  if(d)h+='<div><span>Fan discount (10%)</span><span>-'+KES(d)+'</span></div>';
+  $('#sum').innerHTML=h+'<div><span>You pay</span><span class="big">'+KES(total)+'</span></div>';
+  $('#share').textContent='About '+KES(total*SHARE)+' of this goes to '+c.name+'.';
+  $('#sSize').value=J.size;
+  var tee=$('[data-art="tee"]');if(tee)tee.innerHTML=jerseySVG({club:c,kit:'home',name:'',num:'',view:'front',uid:'tee',plain:true});
+  renderModal();
+}
+function setJ(patch,skip){
+  Object.keys(patch).forEach(function(k){J[k]=patch[k]});
+  [['hName','name'],['hNum','num'],['sName','name'],['sNum','num'],['mName','name'],['mNum','num']].forEach(function(p){if(skip!==p[0])$('#'+p[0]).value=J[p[1]]});
+  renderJersey();
+}
+[['hName','name',cleanName],['sName','name',cleanName],['mName','name',cleanName],['hNum','num',cleanNum],['sNum','num',cleanNum],['mNum','num',cleanNum]].forEach(function(p){
+  $('#'+p[0]).oninput=function(){var o={};o[p[1]]=p[2](this.value);setJ(o,p[0])};
+});
+$('#sSize').onchange=function(){J.size=this.value;renderJersey()};
+$('#vFront').onclick=function(){J.view='front';renderJersey()};
+$('#vBack').onclick=function(){J.view='back';renderJersey()};
+
+/* ---------- shirts in the basket ---------- */
+function shirtDetail(j){return (j.name?j.name.toUpperCase():'No name')+' · '+(j.num||'No number')+' · '+j.size}
+function shirtItem(j){return {title:club().name+' '+j.kit+' shirt',detail:shirtDetail(j),price:isKid(j.size)?PRICE.kids:PRICE.adult,disc:true,shirt:true,jk:j.kit,jn:j.name,jnum:j.num,js:j.size}}
+function addShirt(j){addItem(shirtItem(j||J))}
+$('#addShirt').onclick=function(){addShirt()};
+$('#hAdd').onclick=function(){addShirt()};
+$('#hFan').onclick=function(){openModal(2)};
+$('#shopFan').onclick=function(){openModal(2)};
+function quickCheckout(){
+  if(!FAN||!FAN.jersey)return;
+  var d=shirtDetail(FAN.jersey);
+  if(!cart.some(function(i){return i.shirt&&i.detail===d}))addShirt(FAN.jersey);
+  location.hash='#basket';
+}
+
+/* ---------- merch ---------- */
+var MERCH=[
+  {id:'scarf',title:'Supporter scarf',price:900,art:'<div class="scarf"></div>'},
+  {id:'cap',title:'Club cap',price:700,art:'<svg viewBox="0 0 120 90" aria-hidden="true"><path d="M18 62 Q18 14 62 14 Q104 14 104 62 Z" style="fill:var(--accent)"/><path d="M58 62 H116 Q116 74 102 74 H58 Z" style="fill:var(--sec)"/><circle cx="62" cy="16" r="5" style="fill:var(--sec)"/></svg>'},
+  {id:'flag',title:'Club flag',price:1500,art:'<div class="flagart"><span class="crest" data-crest></span></div>'},
+  {id:'tee',title:'Supporter tee',price:1200,sizes:['S','M','L','XL'],art:'<span data-art="tee"></span>'}
+];
+function renderMerch(){
+  $('#merch').innerHTML=MERCH.map(function(m){
+    var h='<div class="card" style="background:var(--bg);border:3px solid var(--ink)"><div class="art" style="background:var(--paper)">'+m.art+'</div><h3>'+m.title+'</h3><div class="prodrow"><span class="price">'+KES(m.price)+'</span><span style="flex:1"></span>';
+    if(m.sizes)h+='<select aria-label="Size for '+m.title+'" id="ms-'+m.id+'">'+m.sizes.map(function(s){return '<option>'+s+'</option>'}).join('')+'</select>';
+    return h+'<button class="btn sm" type="button" data-m="'+m.id+'">Add</button></div></div>'}).join('');
+  $$('#merch [data-crest]').forEach(function(e){e.innerHTML=crestHTML(club())});
+  var tee=$('[data-art="tee"]');if(tee)tee.innerHTML=jerseySVG({club:club(),kit:'home',name:'',num:'',view:'front',uid:'tee',plain:true});
+  $$('#merch [data-m]').forEach(function(b){b.onclick=function(){
+    var m=MERCH.filter(function(x){return x.id===b.getAttribute('data-m')})[0],sel=$('#ms-'+m.id);
+    addItem({title:club().name+' '+m.title.toLowerCase(),detail:sel?'Size '+sel.value:'One size',price:m.price,disc:true});
+  }});
+}
+
+/* ---------- basket + simulated M-Pesa + auto fan ---------- */
+function addItem(it){it.qty=1;cart.push(it);updateCart();toast('Added to cart')}
+function cartTotals(){
+  var sub=0,disc=0,merch=0,give=0;
+  cart.forEach(function(i){var l=i.price*i.qty;sub+=l;if(i.disc){merch+=l;if(FAN)disc+=Math.round(l*.1)}if(i.fund)give+=l});
+  return {sub:sub,disc:disc,total:sub-disc,merch:merch,give:give};
+}
+function updateCart(){
+  $('#cartN').textContent=cart.reduce(function(a,i){return a+i.qty},0);
+  var t=cartTotals(),rb='';
+  if(FAN&&FAN.jersey&&!cart.some(function(i){return i.shirt&&i.detail===shirtDetail(FAN.jersey)})){
+    rb='<div class="ready"><span>'+miniShirt(FAN.jersey,'rdy')+'</span><div><strong>Your fan shirt is ready</strong><br><span>'+esc(shirtDetail(FAN.jersey))+'</span></div><button class="btn sm" type="button" id="readyAdd">Add</button></div>';
+  }
+  $('#readyBox').innerHTML=rb;var ra=$('#readyAdd');if(ra)ra.onclick=function(){addShirt(FAN.jersey)};
+  $('#paySmsBox').hidden=!!(FAN&&FAN.sms);
+  if(!cart.length){
+    $('#cartList').innerHTML='<p class="muted">Your basket is empty. <a href="#shop"><u>Visit the shop</u></a> or <a href="#support"><u>support the club</u></a>.</p>';
+    $('#cartSum').innerHTML='';$('#payBox').hidden=true;return;
+  }
+  $('#payBox').hidden=false;
+  $('#cartList').innerHTML=cart.map(function(i,n){return '<div class="line"><div><strong>'+esc(i.title)+'</strong><br><span class="muted">'+esc(i.detail)+'</span></div><strong>'+KES(i.price*i.qty)+'</strong><button class="rm" type="button" data-rm="'+n+'">Remove</button></div>'}).join('');
+  $$('#cartList [data-rm]').forEach(function(b){b.onclick=function(){cart.splice(+b.getAttribute('data-rm'),1);updateCart()}});
+  var h='<div><span>Subtotal</span><span>'+KES(t.sub)+'</span></div>';
+  if(t.disc)h+='<div><span>Fan discount (10%)</span><span>-'+KES(t.disc)+'</span></div>';
+  else if(t.merch)h+='<div><span class="muted">Fans get 10% off. Paying makes you one.</span><span></span></div>';
+  $('#cartSum').innerHTML=h+'<div><span>Total</span><span class="big">'+KES(t.total)+'</span></div>';
+}
+$('#payBtn').onclick=function(){
+  var pm=$('#payMsg'),ph=$('#payPhone').value;
+  if(!cart.length)return;
+  if(!phoneOK(ph)){pm.innerHTML='<div class="msg err">Enter a Safaricom number like 0712 345 678.</div>';$('#payPhone').focus();return}
+  var t=cartTotals(),btn=this,wantSms=$('#paySms').checked;btn.disabled=true;
+  pm.innerHTML='<div class="msg">Sending the M-Pesa prompt to '+esc(ph)+'...</div>';
+  setTimeout(function(){pm.innerHTML='<div class="msg">Prompt sent (demo). Enter your M-Pesa PIN on the phone to pay '+KES(t.total)+'.</div>'},1200);
+  setTimeout(function(){
+    var ref='ORD-'+rid(),extra='',s=cart.filter(function(i){return i.shirt})[0];
+    cart.forEach(function(i){if(i.fund){FUNDS.forEach(function(f){if(f.id===i.fund)f.raised+=i.price})}});
+    if(!FAN){
+      FAN={name:(s&&s.jn)||'Fan',no:'MU-'+String(Math.floor(Math.random()*900)+100),code:'FAN10-'+rid(),points:25,checkins:0,weekMoney:0,last:'',phone:ph,sms:wantSms,via:'purchase',rem:{},
+        jersey:s?{kit:s.jk,name:s.jn,num:s.jnum,size:s.js}:null};
+      extra=' You are now in the fan club'+(s?' and your shirt is saved for next time.':'.');
+    }else if(s&&!FAN.jersey){FAN.jersey={kit:s.jk,name:s.jn,num:s.jnum,size:s.js};extra=' Your shirt is saved for next time.'}
+    var want=Math.floor(t.merch/100)+Math.floor(t.give/50),room=Math.max(0,100-(FAN.weekMoney||0)),got=Math.min(want,room);
+    if(got){FAN.points+=got;FAN.weekMoney=(FAN.weekMoney||0)+got;extra+=' You earned '+got+' fan points.'}
+    store.set('fan',FAN);
+    pm.innerHTML='<div class="msg ok"><strong>Payment received (demo).</strong> Order '+ref+' for '+KES(t.total)+'. The club receives its share.'+esc(extra)+'</div>';
+    cart=[];btn.disabled=false;renderFan();renderFunds();updateCart();
+  },3200);
+};
+
+/* ---------- fixtures, results, tables ---------- */
+var SQUADS=['Team A','Team B','Under 17','Under 13','Under 10'];
+function nextSat(){var d=new Date(),add=(6-d.getDay()+7)%7,t=new Date(d.getFullYear(),d.getMonth(),d.getDate()+add,15,0,0);if(t<=d)t.setDate(t.getDate()+7);return t}
+var KO=nextSat();
+function fixtures(){
+  var base=KO,out=[],defs=[[0,'Team A','Opponent A',1,'15:00'],[0,'Under 17','Opponent B',0,'11:00'],[1,'Under 13','Opponent C',1,'10:00'],[7,'Team B','Opponent D',0,'15:00'],[7,'Under 10','Opponent E',1,'09:30'],[14,'Team A','Opponent F',0,'15:00'],[14,'Under 17','Opponent G',1,'11:00'],[21,'Team A','Opponent B',1,'15:00']];
+  defs.forEach(function(x,i){var d=new Date(base);d.setDate(d.getDate()+x[0]);out.push({id:'f'+i,d:d,sq:x[1],opp:x[2],home:!!x[3],t:x[4],price:/^Team/.test(x[1])?100:50})});
+  return out;
+}
+function remOn(id){return !!(FAN&&FAN.rem&&FAN.rem[id])}
+function fxRow(f){
+  var ds=f.d.toLocaleDateString('en-GB',{weekday:'short'}),mon=f.d.toLocaleDateString('en-GB',{month:'short'});
+  var teams=f.home?club().name+' v '+f.opp:f.opp+' v '+club().name;
+  return '<div class="fx"><div class="dt"><b>'+f.d.getDate()+'</b><span>'+mon+'</span></div><div><strong>'+esc(teams)+'</strong><br><span class="muted">'+ds+' · '+f.t+' · '+f.sq+(f.home?' · Home':' · Away')+'</span></div><div class="fxb"><button class="btn sm y" type="button" data-tk="'+f.id+'">Ticket '+KES(f.price)+'</button><button class="btn sm line" type="button" data-rem="'+f.id+'">'+(remOn(f.id)?'Reminder on':'Remind me')+'</button></div></div>';
+}
+var fxFilter='All';
+function renderFixtures(){
+  var all=fixtures();
+  $('#fixHome').innerHTML=all.slice(0,3).map(fxRow).join('');
+  $('#fxTabs').innerHTML=['All'].concat(SQUADS).map(function(s){return '<button type="button" data-s="'+s+'" aria-pressed="'+(s===fxFilter)+'">'+s+'</button>'}).join('');
+  $$('#fxTabs button').forEach(function(b){b.onclick=function(){fxFilter=b.getAttribute('data-s');renderFixtures()}});
+  $('#fxList').innerHTML=all.filter(function(f){return fxFilter==='All'||f.sq===fxFilter}).map(fxRow).join('')||'<p class="muted">No fixtures yet.</p>';
+  var res=[[-7,'Team A','Opponent C','3-1','W'],[-7,'Under 17','Opponent D','1-1','D'],[-14,'Team A','Opponent E','0-2','L'],[-14,'Under 13','Opponent F','2-0','W'],[-21,'Team B','Opponent G','4-2','W']];
+  $('#resList').innerHTML=res.map(function(r){var d=new Date(KO);d.setDate(d.getDate()+r[0]);
+    return '<div class="res"><div><span class="badge '+r[4]+'">'+r[4]+'</span><strong>'+esc(club().name)+' v '+r[2]+'</strong><br><span class="muted">'+d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' · '+r[1]+'</span></div><div class="sc">'+r[3]+'</div></div>'}).join('');
+}
+function rng(seed){return function(){seed=(seed*1664525+1013904223)%4294967296;return seed/4294967296}}
+function table(sq){
+  var r=rng(sq.split('').reduce(function(a,c){return (a*31+c.charCodeAt(0))%1000003},7)),rows=[];
+  [club().name].concat(['Opponent A','Opponent B','Opponent C','Opponent D','Opponent E','Opponent F','Opponent G']).forEach(function(n,i){
+    var w,d,l;if(i===0){w=6;d=2;l=2}else{w=Math.floor(r()*7)+1;d=Math.floor(r()*(10-w+1));l=10-w-d}
+    var gf=w*2+d+Math.floor(r()*6),ga=l*2+d+Math.floor(r()*5),form='';
+    for(var k=0;k<5;k++){var x=r()*10;form+=(x<w?'W':x<w+d?'D':'L')}
+    rows.push({n:n,p:10,w:w,d:d,l:l,gd:gf-ga,pts:w*3+d,form:form,me:i===0});
+  });
+  rows.sort(function(a,b){return b.pts-a.pts||b.gd-a.gd});return rows;
+}
+function tableHTML(sq,limit){
+  var rows=table(sq).slice(0,limit||8);
+  return '<table class="tbl"><thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GD</th><th>Pts</th><th>Form</th></tr></thead><tbody>'+rows.map(function(r,i){
+    return '<tr class="'+(r.me?'me':'')+'"><td>'+(i+1)+'</td><td>'+esc(r.n)+'</td><td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td>'+(r.gd>0?'+':'')+r.gd+'</td><td class="pts">'+r.pts+'</td><td style="white-space:nowrap">'+r.form.split('').map(function(f){return '<span class="fm '+f+'">'+f+'</span>'}).join('')+'</td></tr>'}).join('')+'</tbody></table>';
+}
+var tblSq='Team A';
+function renderTables(){
+  $('#tblHome').innerHTML=tableHTML('Team A',5);
+  $('#tblTabs').innerHTML=SQUADS.map(function(s){return '<button type="button" data-s="'+s+'" aria-pressed="'+(s===tblSq)+'">'+s+'</button>'}).join('');
+  $$('#tblTabs button').forEach(function(b){b.onclick=function(){tblSq=b.getAttribute('data-s');renderTables()}});
+  $('#tblFull').innerHTML=tableHTML(tblSq,8);
+}
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-tk]'),r=e.target.closest('[data-rem]'),p=e.target.closest('[data-p]');
+  if(t){var f=fixtures().filter(function(x){return x.id===t.getAttribute('data-tk')})[0];ticket(f)}
+  if(r){
+    if(!FAN){openModal(2);return}
+    var id=r.getAttribute('data-rem');FAN.rem=FAN.rem||{};FAN.rem[id]=!FAN.rem[id];store.set('fan',FAN);renderFixtures();
+    toast(FAN.rem[id]?(FAN.sms?'Reminder set (demo). We text you before kick-off.':'Reminder saved. Turn on SMS to get texts.'):'Reminder removed');
+  }
+  if(p){openPhoto(p.getAttribute('data-p'))}
+});
+function ticket(f){addItem({title:'Match ticket',detail:(f.home?club().name+' v '+f.opp:f.opp+' v '+club().name)+' · '+f.d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}),price:f.price,disc:false})}
+$('#heroTicket').onclick=function(){ticket(fixtures()[0])};
+$('#heroRemind').onclick=function(){
+  if(!FAN){openModal(2);return}
+  var f=fixtures()[0];FAN.rem=FAN.rem||{};FAN.rem[f.id]=true;store.set('fan',FAN);renderFixtures();toast(FAN.sms?'Reminder set (demo). We text you before kick-off.':'Reminder saved.');
+};
+$('#kick').textContent=KO.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+' · 15:00';
+$('#mastDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+function tick(){
+  var ms=KO-new Date();if(ms<0){KO=nextSat();ms=KO-new Date()}
+  var d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4),s=Math.floor(ms%6e4/1e3);
+  $('#cd').textContent=d+'d '+String(h).padStart(2,'0')+'h '+String(m).padStart(2,'0')+'m '+String(s).padStart(2,'0')+'s';
+}
+tick();setInterval(tick,1000);
+
+/* ---------- squads, stars, cabinet ---------- */
+var TEAMS=[
+  {n:'Team A',m:'Senior · League',d:'The first team, playing in the local league on the FKF calendar. Lorem ipsum dolor sit amet.'},
+  {n:'Team B',m:'Reserve · Development',d:'A pathway for players pushing for the first team. Lorem ipsum dolor sit amet.'},
+  {n:'Under 17',m:'Youth · League',d:'Older juniors learning the demands of senior football. Lorem ipsum dolor sit amet.'},
+  {n:'Under 13',m:'Youth · League',d:'Skills, teamwork and confidence for growing players. Lorem ipsum dolor sit amet.'},
+  {n:'Under 10',m:'Juniors · Festivals',d:'First touches and fun for the youngest players. Lorem ipsum dolor sit amet.'}
+];
+$('#teamCards').innerHTML=TEAMS.map(function(t){return '<div class="card"><span class="meta">'+t.m+'</span><h3>'+t.n+'</h3><p>'+t.d+'</p><p class="note">Training: day and time to be confirmed. Coach: to be confirmed.</p><a class="btn sm" style="align-self:flex-start" href="#enrol" data-squad="'+t.n+'">Enrol in '+t.n+'</a></div>'}).join('');
+$$('[data-squad]').forEach(function(a){a.onclick=function(){$('#eSquad').value=a.getAttribute('data-squad')}});
+var STARS=[['Under 17','Midfielder','7','4','12'],['Under 13','Striker','11','9','3'],['Under 10','Goalkeeper','8','0','6']];
+var starHTML=STARS.map(function(s){return '<div class="card star"><svg viewBox="0 0 120 90" aria-hidden="true"><circle cx="60" cy="36" r="16" fill="#f6c400"/><path d="M26 90 Q26 56 60 56 Q94 56 94 90 Z" fill="#f6c400"/></svg><span class="meta" style="color:inherit;opacity:.75">Rising star · '+s[0]+'</span><h3>Player name</h3><p style="color:inherit;opacity:.8">'+s[1]+'. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sample profile.</p><div class="stats3"><div><b>'+s[2]+'</b><span>Apps</span></div><div><b>'+s[3]+'</b><span>Goals</span></div><div><b>'+s[4]+'</b><span>Assists</span></div></div></div>'}).join('');
+$('#starHome').innerHTML=starHTML;$('#starClub').innerHTML=starHTML;
+function medal(col,n){return '<svg viewBox="0 0 80 100" aria-hidden="true"><path d="M22 0 L40 34 L58 0 Z" fill="#0b0b0b"/><circle cx="40" cy="64" r="28" fill="'+col+'" stroke="#0b0b0b" stroke-width="3"/><text x="40" y="76" text-anchor="middle" font-family="Anton,Impact,sans-serif" font-size="32" fill="#0b0b0b">'+n+'</text></svg>'}
+$('#cabinet').innerHTML=[['#f6c400','Title 1'],['#c9ccd1','Title 2'],['#c98a4b','Title 3'],['#f6c400','Title 4'],['#c9ccd1','Title 5'],['#c98a4b','Title 6']].map(function(m,i){return '<div class="medal">'+medal(m[0],i+1)+'<b>'+m[1]+'</b><span>Add name and year</span></div>'}).join('');
+
+/* ---------- photos ---------- */
+var PICS=[
+  ['kick','Match action, 21 Sep 2025','Matchday','A player striking the ball during a league match'],
+  ['supporters','Supporters at the ground','Community','Supporters gathered at the ground'],
+  ['hoops','Hoops kit on matchday','Matchday','A player in the yellow and black hooped shirt'],
+  ['flag','Supporters with the flag','Community','Supporters holding the club flag'],
+  ['juggle','Warm-up touches','Training','A coach controlling a ball in a black club kit'],
+  ['bus','The club bus','Club','The yellow and black club bus'],
+  ['bench','Guests on the touchline','Community','Guests seated beside the pitch'],
+  ['tactics','Team talk','Training','A coach explaining tactics with a magnetic board'],
+  ['celebration','Full-time celebrations','Matchday','Players in yellow and black celebrating together']
+];
+function figs(list){return list.map(function(p){return '<figure><button type="button" data-p="'+p[0]+'"><img src="img/'+p[0]+'.jpg" alt="'+esc(p[3])+'" loading="lazy"><figcaption>'+esc(p[1])+'</figcaption></button></figure>'}).join('')}
+$('#masHome').innerHTML=figs(PICS.slice(0,6));
+var galFilter='All';
+function renderGallery(){
+  $('#galChips').innerHTML=['All','Matchday','Training','Club','Community'].map(function(c){return '<button type="button" data-c="'+c+'" aria-pressed="'+(c===galFilter)+'">'+c+'</button>'}).join('');
+  $('#gal').innerHTML=figs(PICS.filter(function(p){return galFilter==='All'||p[2]===galFilter}));
+  $$('#galChips button').forEach(function(b){b.onclick=function(){galFilter=b.getAttribute('data-c');renderGallery()}});
+}
+function openPhoto(id){var p=PICS.filter(function(x){return x[0]===id})[0];if(!p)return;
+  $('#lbImg').src='img/'+p[0]+'.jpg';$('#lbImg').alt=p[3];$('#lbCap').textContent=p[1];$('#lb').classList.add('open');$('#lbClose').focus()}
+function closeLB(){$('#lb').classList.remove('open')}
+$('#lbClose').onclick=closeLB;$('#lb').onclick=function(e){if(e.target===this)closeLB()};
+
+/* ---------- fan club ---------- */
+function medalSmall(i){return medal(['#f6c400','#c9ccd1','#c98a4b'][i],i+1)}
+function board(){
+  var rows=BOARD.map(function(b){return {n:b[0],p:b[1],me:false}});
+  if(FAN)rows.push({n:FAN.name+' (you)',p:FAN.points,me:true});
+  rows.sort(function(a,b){return b.p-a.p});return rows;
+}
+function renderBoard(){
+  var rows=board();
+  $('#board').innerHTML=rows.slice(0,7).map(function(r,i){return '<li class="'+(r.me?'me':'')+'"><span class="rk">'+(i<3?medalSmall(i):(i+1))+'</span><span>'+esc(r.n)+(i===0?' <span class="tag" style="margin-left:6px">Top fan</span>':'')+'</span><b>'+r.p+' pts</b></li>'}).join('');
+  $('#fotwName').textContent=rows[0].n;$('#fotwPts').textContent=rows[0].p+' points this week. Top Fan medal and a sponsor prize.';
+  if(FAN){$('#fcPts').textContent=FAN.points;
+    var bd=['First Whistle'];if(FAN.checkins>=1)bd.push('Matchday Regular');if(rows[0].me)bd.push('Twelfth Man');
+    $('#fcBadges').innerHTML=bd.map(esc).join('<br>');}
+}
+function renderChip(){
+  var on=!!(FAN&&FAN.jersey);$('#myShirt').hidden=!on;
+  if(on){$('#myShirtIcon').innerHTML=miniShirt(FAN.jersey,'chip');$('#myShirtTxt').textContent=(FAN.jersey.name||'My shirt').toUpperCase()}
+}
+function renderFan(){
+  $('#fanForm').hidden=!!FAN;$('#fanCardBox').hidden=!FAN;
+  if(FAN){$('#fcName').textContent=FAN.name;$('#fcNo').textContent=FAN.no;$('#fcCode').textContent=FAN.code;
+    $('#fcJersey').innerHTML=FAN.jersey?'<span>'+miniShirt(FAN.jersey,'fcj')+'</span><span><strong>Shirt ready to check out</strong><br><span class="note">'+esc(shirtDetail(FAN.jersey))+'</span></span><button class="btn y sm" type="button" id="fcGo" style="margin-left:auto">Check out</button>':'<span class="note">No shirt saved yet. Design one in the shop.</span>';
+    var go=$('#fcGo');if(go)go.onclick=quickCheckout}
+  renderBoard();renderChip();renderJersey();updateCart();renderFixtures();
+}
+function newFan(name,phone,sms,via,jersey){
+  FAN={name:name,no:'MU-'+String(Math.floor(Math.random()*900)+100),code:'FAN10-'+rid(),points:25,checkins:0,weekMoney:0,last:'',phone:phone,sms:sms,via:via,rem:{},jersey:jersey?{kit:jersey.kit,name:jersey.name,num:jersey.num,size:jersey.size}:null};
+  store.set('fan',FAN);
+}
+$('#fanForm').onsubmit=function(e){
+  e.preventDefault();var n=$('#fName').value.trim(),p=$('#fPhone').value,m=$('#fanMsg');
+  if(!n){m.innerHTML='<div class="msg err">Enter your name.</div>';return}
+  if(!phoneOK(p)){m.innerHTML='<div class="msg err">Enter a phone number like 0712 345 678.</div>';return}
+  newFan(n.slice(0,24),p,$('#fSms').checked,'form',J.name?J:null);m.innerHTML='';renderFan();toast('Welcome to the fan club. 25 points added.');
+};
+$('#checkinBtn').onclick=function(){
+  var today=new Date().toDateString();
+  if(FAN.last===today){toast('Already checked in today');return}
+  FAN.last=today;FAN.points+=10;FAN.checkins++;store.set('fan',FAN);renderBoard();toast('Checked in. +10 points');
+};
+$('#signoutBtn').onclick=function(){FAN=null;store.set('fan',null);renderFan();toast('You left the fan club')};
+
+/* ---------- poll + wall ---------- */
+var POLL={o:['Player 1','Player 2','Player 3'],v:[41,33,26],voted:ssGet('voted')==='1'};
+function renderPoll(){
+  var tot=POLL.v.reduce(function(a,b){return a+b},0);
+  var h=POLL.o.map(function(o,i){var pc=Math.round(POLL.v[i]/tot*100);return '<button type="button" data-v="'+i+'"'+(POLL.voted?' disabled':'')+'><i style="width:'+pc+'%"></i><span><span>'+esc(o)+'</span><span>'+pc+'%</span></span></button>'}).join('');
+  $('#poll').innerHTML=h;$('#poll2').innerHTML=h;
+  $$('.poll button').forEach(function(b){b.onclick=function(){if(POLL.voted)return;POLL.v[+b.getAttribute('data-v')]++;POLL.voted=true;ssSet('voted','1');renderPoll();toast('Vote counted')}});
+}
+var SAMPLE=[{n:'Wanjiru K.',t:'Saturday was electric. Lorem ipsum dolor sit amet, the whole ground was singing.',c:12,ago:'2h ago'},{n:'Brian M.',t:'Proud of the U13s. Consectetur adipiscing elit, they never stopped running.',c:8,ago:'1d ago'},{n:'Faith N.',t:'The new shirts look sharp. Sed do eiusmod tempor, ordering mine this week.',c:5,ago:'2d ago'},{n:'Kamau J.',t:'Best fans in the league. Ut enim ad minim veniam.',c:3,ago:'4d ago'}];
+var WALL=store.get('wall',[]),clapped={};
+function wallItems(){return WALL.concat(SAMPLE)}
+function cmHTML(c,i){return '<div class="cm"><div class="av" aria-hidden="true">'+esc(c.n.charAt(0).toUpperCase())+'</div><div><strong>'+esc(c.n)+'</strong> <small>'+esc(c.ago)+'</small><p>'+esc(c.t)+'</p></div><button class="clap" type="button" data-clap="'+i+'" aria-pressed="'+(!!clapped[i])+'" aria-label="Clap">Clap '+(c.c+(clapped[i]?1:0))+'</button></div>'}
+function renderWall(){
+  var items=wallItems();
+  $('#wallHome').innerHTML=items.slice(0,3).map(cmHTML).join('');
+  $('#wallFull').innerHTML=items.map(cmHTML).join('');
+  $$('.clap').forEach(function(b){b.onclick=function(){var i=b.getAttribute('data-clap');clapped[i]=!clapped[i];renderWall()}});
+}
+$('#wallForm').onsubmit=function(e){
+  e.preventDefault();var n=$('#wName').value.trim()||(FAN?FAN.name:'Guest'),t=$('#wText').value.trim();
+  if(!t){toast('Write a comment first');return}
+  WALL.unshift({n:n,t:t,c:0,ago:'just now'});WALL=WALL.slice(0,20);store.set('wall',WALL);clapped={};$('#wText').value='';renderWall();toast('Comment posted on this device (demo)');
+};
+
+/* ---------- support ---------- */
+function renderFunds(){
+  $('#funds').innerHTML=FUNDS.map(function(f){var pct=Math.min(100,Math.round(f.raised/f.target*100));
+    return '<div class="card"><h3>'+f.title+'</h3><p>'+f.desc+'</p><div class="prog" role="img" aria-label="'+pct+' percent raised"><i style="width:'+pct+'%"></i></div><p><strong style="color:var(--ink)">'+KES(f.raised)+'</strong> of '+KES(f.target)+' · '+pct+'%</p><div class="amts">'+[500,1000,2500].map(function(a){return '<button class="btn sm y" type="button" data-f="'+f.id+'" data-a="'+a+'">'+KES(a)+'</button>'}).join('')+'</div><button class="btn line sm" type="button" data-pick="'+f.id+'" style="align-self:flex-start">Use paybill for this fund</button></div>'}).join('');
+  var bf=FUNDS[0],bp=Math.min(100,Math.round(bf.raised/bf.target*100));
+  $('#homeProg').style.width=bp+'%';$('#homeProgTxt').textContent=KES(bf.raised)+' of '+KES(bf.target)+' raised (sample)';
+  $('#homeGive').innerHTML=[500,1000,2500].map(function(a){return '<button class="btn sm" type="button" data-f="boots" data-a="'+a+'">'+KES(a)+'</button>'}).join('');
+  $$('[data-a]').forEach(function(b){b.onclick=function(){var f=FUNDS.filter(function(x){return x.id===b.getAttribute('data-f')})[0];addItem({title:'Gift: '+f.title,detail:'Donation',price:+b.getAttribute('data-a'),disc:false,fund:f.id})}});
+  $$('[data-pick]').forEach(function(b){b.onclick=function(){var f=FUNDS.filter(function(x){return x.id===b.getAttribute('data-pick')})[0];$('#acctNo').textContent=f.acct;toast('Account name set to '+f.acct)}});
+}
+$('#copyPay').onclick=function(){
+  var txt='Paybill 000000, Account '+$('#acctNo').textContent;
+  try{navigator.clipboard.writeText(txt).then(function(){toast('Copied')},function(){toast(txt)})}catch(e){toast(txt)}
+};
+
+/* ---------- enrol + contact ---------- */
+var selfMode=false;
+function setMode(s){
+  selfMode=s;$('#mChild').setAttribute('aria-pressed',!s);$('#mSelf').setAttribute('aria-pressed',s);
+  $('#parentBox').hidden=s;$$('#parentBox input').forEach(function(i){i.disabled=s});
+  $('#selfPhoneBox').hidden=!s;$('#sPhone').required=s;
+  $('#cGuardWrap').hidden=s;$('#cGuard').required=!s;$('#cGuard').disabled=s;suggest();
+}
+$('#mChild').onclick=function(){setMode(false)};$('#mSelf').onclick=function(){setMode(true)};
+function suggest(){
+  var v=$('#eDob').value;if(!v)return;
+  var b=new Date(v),n=new Date(),age=n.getFullYear()-b.getFullYear()-((n.getMonth()<b.getMonth()||(n.getMonth()===b.getMonth()&&n.getDate()<b.getDate()))?1:0),sq;
+  if(age<=10)sq='Under 10';else if(age<=13)sq='Under 13';else if(age<=17)sq='Under 17';else sq='Team B';
+  $('#eSquad').value=sq;$('#squadHint').textContent='Age '+age+'. Suggested squad: '+sq+'. The coach confirms the squad.';
+}
+$('#eDob').max=new Date().toISOString().slice(0,10);$('#eDob').onchange=suggest;
+$('#enrolForm').onsubmit=function(e){
+  e.preventDefault();var m=$('#enrolMsg'),f=this;
+  if(!f.checkValidity()){f.reportValidity();return}
+  if(!selfMode&&!phoneOK($('#gPhone').value)){m.innerHTML='<div class="msg err">Enter a phone number like 0712 345 678.</div>';return}
+  var prog=[];if($('#pTrain').checked)prog.push('weekly training');if($('#pCamp').checked)prog.push('holiday camp');if($('#pTrial').checked)prog.push('squad trial');
+  if(!prog.length){m.innerHTML='<div class="msg err">Choose at least one programme.</div>';return}
+  m.innerHTML='<div class="msg ok"><strong>Enrolment ready (prototype).</strong> Reference ENR-'+rid()+'. '+esc($('#eFirst').value)+' for '+esc($('#eSquad').value)+': '+prog.join(', ')+'. In the live site the club gets this and texts you to book a trial.</div>';
+  m.scrollIntoView({block:'center'});
+};
+$('#contactForm').onsubmit=function(e){e.preventDefault();var f=this;if(!f.checkValidity()){f.reportValidity();return}$('#contactMsg').innerHTML='<div class="msg ok">Thanks. This is a prototype, so the message was not sent.</div>'};
+
+/* ---------- shirt pop-up: name, then add to cart, become a fan, or no thanks ---------- */
+function mStep(n){['#mStep1','#mStep2','#mStep3'].forEach(function(s,i){$(s).hidden=(i+1!==n)})}
+function renderModal(){
+  $('#mStage').innerHTML=jerseySVG({club:club(),kit:J.kit,name:J.name,num:J.num,view:'back',uid:'m'});
+  $('#mKits').innerHTML=[['home','Home'],['hoops','Hoops'],['away','Away']].map(function(k){return '<button type="button" data-kit="'+k[0]+'" aria-pressed="'+(J.kit===k[0])+'">'+k[1]+'</button>'}).join('');
+  $$('#mKits button').forEach(function(b){b.onclick=function(){J.kit=b.getAttribute('data-kit');renderJersey()}});
+  var p=shirtPrice(),d=FAN?Math.round(p*.1):0;
+  $('#mSum').innerHTML='<span>'+KES(p-d)+(d?' with fan discount':'')+'</span><span>About '+KES((p-d)*SHARE)+' goes to the club</span>';
+}
+function openModal(step){
+  if(FAN&&FAN.jersey&&!J.name){J.kit=FAN.jersey.kit;J.size=FAN.jersey.size;J.name=FAN.jersey.name;J.num=FAN.jersey.num}
+  setJ({});
+  var first=FAN?FAN.name.split(' ')[0]:'';
+  $('#mEyebrow').textContent=FAN?'Welcome back, '+first:'Welcome to '+club().name;
+  $('#mTitle').textContent=FAN?'Your shirt is ready':'Put your name on the shirt';
+  $('#mLead').textContent=FAN?'Check it out, or change the name and number first.':'Type a name and see it on the '+club().name+' shirt. Every shirt raises money for the club.';
+  $('#mFan').hidden=!!FAN;
+  $('#mFName').value=J.name||'';
+  mStep(step===2&&!FAN?2:1);$('#modal').hidden=false;document.body.style.overflow='hidden';
+  setTimeout(function(){(step===2&&!FAN?$('#mFName'):$('#mName')).focus()},60);
+}
+function closeModal(){$('#modal').hidden=true;document.body.style.overflow='';ssSet('seenPop','1')}
+$('#mAdd').onclick=function(){addShirt();closeModal();location.hash='#basket'};
+$('#mFan').onclick=function(){$('#mFName').value=J.name||'';mStep(2);setTimeout(function(){$('#mFName').focus()},60)};
+$('#mNo').onclick=closeModal;$('#mClose').onclick=closeModal;$('#mDone').onclick=closeModal;
+$('#mBack').onclick=function(){mStep(1)};
+$('#mSave').onclick=function(){
+  var nm=$('#mFName').value.trim(),ph=$('#mPhone').value,m=$('#mMsg');
+  if(!nm){m.innerHTML='<div class="msg err">Enter your name.</div>';return}
+  if(!phoneOK(ph)){m.innerHTML='<div class="msg err">Enter a phone number like 0712 345 678.</div>';return}
+  if(!$('#mConsent').checked){m.innerHTML='<div class="msg err">Tick the box so we can text you before match days.</div>';return}
+  newFan(nm.slice(0,24),ph,true,'popup',J);m.innerHTML='';
+  var f=fixtures()[0];
+  $('#mSavedTxt').textContent=(J.name?J.name.toUpperCase()+' '+(J.num||'10')+' is':'Your shirt is')+' saved and ready to check out. We will text '+ph+' before match days.';
+  $('#mNext').innerHTML='Next game: '+esc(club().name)+' v '+f.opp+'<br><span style="font-weight:600">'+f.d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+' · '+f.t+'</span>';
+  mStep(3);renderFan();
+};
+$('#mTicket').onclick=function(){ticket(fixtures()[0]);closeModal();location.hash='#basket'};
+$('#mCheckout').onclick=function(){closeModal();quickCheckout()};
+$('#modal').onclick=function(e){if(e.target===this)closeModal()};
+$('#navShirt').onclick=function(){$('#top').classList.remove('open');$('#menuBtn').setAttribute('aria-expanded','false');openModal()};
+$('#coverShirt').onclick=function(){openModal()};
+$('#myShirt').onclick=quickCheckout;
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeLB();if(!$('#modal').hidden)closeModal()}});
+
+/* ---------- router ---------- */
+var VIEWS=['home','matchday','club','fans','shop','basket','enrol','support'];
+function route(){
+  var h=(location.hash||'#home').slice(1);if(VIEWS.indexOf(h)<0)h='home';
+  VIEWS.forEach(function(v){$('#v-'+v).hidden=(v!==h)});
+  $$('#nav a').forEach(function(a){if(a.getAttribute('data-nav')===h)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  $('#top').classList.remove('open');$('#menuBtn').setAttribute('aria-expanded','false');
+  window.scrollTo(0,0);
+}
+$('#menuBtn').onclick=function(){var o=$('#top').classList.toggle('open');this.setAttribute('aria-expanded',o)};
+window.addEventListener('hashchange',route);
+
+/* ---------- init ---------- */
+renderGallery();renderFunds();renderPoll();renderWall();
+applyClub('mu');route();
+if(!ssGet('seenPop'))setTimeout(function(){openModal()},1000);
+})();
+</script>
+</body>
+</html>
