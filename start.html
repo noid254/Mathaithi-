@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0f">
+<title>Tukosoko: your club website in minutes</title>
+<meta name="description" content="Set up a club website with news, fixtures, players, tickets, fundraising and your own kit shop. Built for grassroots clubs in Kenya.">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#f6c400;--on:#0b0b0f;--bg:#0b0b0f;--s1:#15151c;--s2:#1e1e27;--line:#2a2a35;--mut:#a3a3b2;--ok:#2ecc71;--bad:#ff6b6b;--disp:'Barlow Condensed',Impact,'Arial Narrow',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+body{background:var(--bg);color:#fff;font:400 15px/1.5 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer;background:none;border:0}
+h1,h2,h3{font-family:var(--disp);font-weight:800;text-transform:uppercase;line-height:1}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+.top{border-bottom:1px solid var(--line)}.top .wrap{height:56px;display:flex;align-items:center;justify-content:space-between}
+.logo{font:800 24px var(--disp);text-transform:uppercase;letter-spacing:.02em}.logo b{color:var(--accent)}
+.top a{font-size:13px;color:var(--mut);text-decoration:none}
+.hero{padding:34px 0 22px}.hero h1{font-size:clamp(44px,13vw,72px)}.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p{color:#d6d6e0;margin:14px 0 20px;max-width:46ch;font-size:17px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 24px;border-radius:999px;background:var(--accent);color:var(--on);font:800 14px Inter;text-transform:uppercase;letter-spacing:.05em}
+.btn:disabled{opacity:.5}.btn.dk{background:var(--s2);color:#fff}.btn.blk{width:100%}
+.perks{display:grid;gap:10px;margin:6px 0 30px}.perk{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:14px 16px}.perk b{display:block;font:800 20px var(--disp);text-transform:uppercase}.perk span{color:var(--mut);font-size:14px}
+.card{background:var(--s1);border:1px solid var(--line);border-radius:18px;padding:18px}
+.steps{display:flex;gap:6px;margin-bottom:16px}.steps i{flex:1;height:5px;border-radius:3px;background:var(--s2)}.steps i.on{background:var(--accent)}
+.card h2{font-size:32px;margin-bottom:4px}.card>p.lead{color:var(--mut);margin-bottom:6px}
+label{display:block;font:700 12px Inter;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);margin:16px 0 6px}
+input[type=text],input[type=email],input[type=tel],input[type=password],input[type=number],select{width:100%;min-height:50px;padding:11px 14px;background:var(--s2);border:1.5px solid var(--line);border-radius:12px}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:12.5px;color:var(--mut);margin-top:6px}.hint.ok{color:var(--ok)}.hint.bad{color:var(--bad)}
+.addr{display:flex;align-items:center;background:var(--s2);border:1.5px solid var(--line);border-radius:12px;overflow:hidden}.addr input{border:0;background:transparent;min-height:50px}.addr span{padding-right:14px;color:var(--mut);font-size:14px;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:10px 15px;border-radius:999px;background:var(--s2);border:1.5px solid var(--line);font:700 13px Inter}.chip[aria-pressed=true]{background:var(--accent);color:var(--on);border-color:var(--accent)}
+.colors{display:grid;grid-template-columns:1fr 1fr;gap:10px}.colors label{margin-top:0}
+input[type=color]{width:100%;height:50px;padding:4px;border-radius:12px;background:var(--s2);border:1.5px solid var(--line)}
+.crest{display:flex;align-items:center;gap:14px}.crest .pv{width:72px;height:72px;border-radius:14px;background:var(--s2);border:1.5px dashed var(--line);display:grid;place-items:center;overflow:hidden;flex:none}.crest .pv img{width:100%;height:100%;object-fit:contain}
+.kits{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.kits div{background:var(--s2);border-radius:14px;padding:10px;text-align:center}.kits small{color:var(--mut);font:700 11px Inter;text-transform:uppercase;letter-spacing:.07em}.kits svg{width:100%;max-width:170px;margin:4px auto 0;display:block}
+.tg{display:flex;gap:12px;align-items:flex-start;padding:14px;background:var(--s2);border:1.5px solid var(--line);border-radius:14px;margin-top:10px;text-align:left;width:100%}
+.tg[aria-pressed=true]{border-color:var(--accent)}.tg .sw{flex:none;width:44px;height:26px;border-radius:13px;background:#3a3a46;position:relative;transition:.2s;margin-top:2px}.tg .sw:after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.tg[aria-pressed=true] .sw{background:var(--accent)}.tg[aria-pressed=true] .sw:after{left:21px;background:var(--on)}
+.tg b{display:block}.tg span{color:var(--mut);font-size:13px}
+.nav{display:flex;gap:10px;margin-top:22px}.nav .btn{flex:1}.nav .btn.dk{flex:0 0 auto}
+.err{color:var(--bad);margin-top:12px;font-size:14px}
+.done h2{font-size:42px}.done .url{display:block;background:var(--s2);border-radius:12px;padding:14px;margin:14px 0;font:700 17px Inter;word-break:break-all;text-align:center;text-decoration:none}
+.done ol{margin:12px 0 18px 20px;color:#d6d6e0}.done li{margin:6px 0}
+footer{padding:36px 0 50px;color:var(--mut);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><span class="logo">Tuko<b>soko</b></span><a href="/admin">Club sign in</a></div></header>
+<main class="wrap">
+  <section class="hero" id="hero">
+    <h1>Your club.<br><em>Online</em> today.</h1>
+    <p>Answer a few questions and we build your club website: news, fixtures, players, tickets and fundraising. Design your own kit and sell it to your fans.</p>
+    <button class="btn" id="go">Set up my club</button>
+  </section>
+  <section class="perks" id="perks">
+    <div class="perk"><b>A site that looks the part</b><span>Mobile-first, in your club colours, ready in minutes.</span></div>
+    <div class="perk"><b>Your kit, your price</b><span>Pick colours, a pattern and your crest. Fans order with their name and number. You choose the mark-up.</span></div>
+    <div class="perk"><b>Delivered by parcel or Pickup Mtaani</b><span>Orders go to the printer in batches. Fans pay with M-Pesa.</span></div>
+    <div class="perk"><b>You run it from your phone</b><span>Post news, enter results, update the table, answer enquiries.</span></div>
+  </section>
+
+  <section class="card" id="form" hidden>
+    <div class="steps" id="steps"></div>
+    <div id="s0">
+      <h2>Your club</h2><p class="lead">The basics. You can change any of this later.</p>
+      <label for="name">Club name</label><input id="name" type="text" maxlength="60" placeholder="e.g. Ngong Stars FC" autocomplete="organization">
+      <label for="slug">Web address</label>
+      <div class="addr"><input id="slug" type="text" maxlength="24" placeholder="ngongstars" autocapitalize="none" autocomplete="off"><span>.tukosoko.com</span></div>
+      <p class="hint" id="slugHint">Letters and numbers only.</p>
+      <div class="row2"><div><label for="short">Short name (3 letters)</label><input id="short" type="text" maxlength="3" placeholder="NGS"></div><div><label for="est">Founded</label><input id="est" type="number" inputmode="numeric" min="1900" max="2100" placeholder="2015"></div></div>
+      <div class="row2"><div><label for="town">Town or area</label><input id="town" type="text" maxlength="60" placeholder="Ngong"></div><div><label for="ground">Home ground</label><input id="ground" type="text" maxlength="80" placeholder="Optional"></div></div>
+      <label for="motto">Motto (optional)</label><input id="motto" type="text" maxlength="80" placeholder="Pride of the community">
+    </div>
+    <div id="s1" hidden>
+      <h2>Your look</h2><p class="lead">Add your crest and colours. Watch your kit change.</p>
+      <label>Crest</label>
+      <div class="crest"><div class="pv" id="cpv"><span class="hint">None</span></div><div><button class="btn dk" type="button" id="cbtn" style="min-height:42px">Upload crest</button><p class="hint">PNG or JPG. No crest yet? Skip it and we show your initials.</p></div></div>
+      <input type="file" id="cfile" accept="image/png,image/jpeg,image/webp" hidden>
+      <div class="colors" style="margin-top:16px"><div><label for="c1">Main colour</label><input type="color" id="c1" value="#1fa463"></div><div><label for="c2">Second colour</label><input type="color" id="c2" value="#ffffff"></div></div>
+      <div class="kits"><div><small>Home</small><span id="k0"></span></div><div><small>Away</small><span id="k1"></span></div></div>
+      <p class="hint">You can add patterns, sponsors and more kits from your dashboard.</p>
+    </div>
+    <div id="s2" hidden>
+      <h2>Squads and training</h2><p class="lead">Which teams do you run?</p>
+      <label>Squads</label><div class="chips" id="squads"></div>
+      <label>Training days</label><div class="chips" id="days"></div>
+      <label for="ttime">Usual start time</label><input id="ttime" type="text" inputmode="numeric" value="16:30" maxlength="5">
+    </div>
+    <div id="s3" hidden>
+      <h2>What do you need?</h2><p class="lead">Switch off anything you do not want yet.</p>
+      <button class="tg" type="button" data-f="shop" aria-pressed="true"><i class="sw"></i><div><b>Kit and merch shop</b><span>Design your kit. Fans order with their name and number.</span></div></button>
+      <button class="tg" type="button" data-f="tickets" aria-pressed="true"><i class="sw"></i><div><b>Match tickets</b><span>Sell tickets for home games.</span></div></button>
+      <button class="tg" type="button" data-f="fundraising" aria-pressed="true"><i class="sw"></i><div><b>Fundraising</b><span>Goals with progress bars. Fans give by M-Pesa.</span></div></button>
+      <button class="tg" type="button" data-f="training" aria-pressed="true"><i class="sw"></i><div><b>Training and joining</b><span>Training times and an enrolment form for new players.</span></div></button>
+    </div>
+    <div id="s4" hidden>
+      <h2>Your account</h2><p class="lead">You will sign in with your email.</p>
+      <label for="owner">Your name</label><input id="owner" type="text" maxlength="60" autocomplete="name">
+      <label for="email">Email</label><input id="email" type="email" maxlength="40" autocomplete="email" autocapitalize="none">
+      <label for="phone">Club phone (shown to fans, optional)</label><input id="phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel">
+      <label for="pw">Password (8 or more characters)</label><input id="pw" type="password" autocomplete="new-password">
+      <p class="hint">New clubs are reviewed before the shop and ticket sales open. Your site is live straight away.</p>
+    </div>
+    <p class="err" id="err" role="alert" hidden></p>
+    <div class="nav"><button class="btn dk" type="button" id="back" hidden>Back</button><button class="btn" type="button" id="next">Continue</button></div>
+  </section>
+
+  <section class="card done" id="done" hidden>
+    <h2>Your site is live</h2>
+    <a class="url" id="siteUrl" href="#" target="_blank" rel="noopener"></a>
+    <p>We have filled it with a welcome post, training times and your home and away kits. Next:</p>
+    <ol><li>Open your dashboard and check your details.</li><li>Add players, fixtures and news.</li><li>Design your kit and set your mark-up. We review your club, then the shop opens.</li></ol>
+    <a class="btn blk" id="adminGo" href="/admin" style="text-decoration:none">Open my dashboard</a>
+  </section>
+</main>
+<footer>Tukosoko &middot; sites for clubs that run on love</footer>
+<script src="/kit.js"></script>
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+var SQ=[['A','Team A'],['B','Team B'],['W','Women'],['U17','Under 17'],['U15','Under 15'],['U13','Under 13'],['U10','Under 10']];
+var DAYS=[['mon','Mon'],['tue','Tue'],['wed','Wed'],['thu','Thu'],['fri','Fri'],['sat','Sat'],['sun','Sun']];
+var S={squads:['A'],days:['tue','thu'],feat:{shop:true,tickets:true,fundraising:true,training:true},crest:null,slugTouched:false,shortTouched:false},step=0,N=5,slugOk=false,slugT;
+function chips(id,list,key){$(id).innerHTML=list.map(function(x){return '<button type="button" class="chip" data-k="'+x[0]+'" aria-pressed="'+(S[key].indexOf(x[0])>-1)+'">'+x[1]+'</button>'}).join('');
+  $(id).onclick=function(e){var b=e.target.closest('[data-k]');if(!b)return;var k=b.getAttribute('data-k'),i=S[key].indexOf(k);if(i>-1)S[key].splice(i,1);else S[key].push(k);b.setAttribute('aria-pressed',i<0)}}
+chips('#squads',SQ,'squads');chips('#days',DAYS,'days');
+$$('.tg').forEach(function(b){b.onclick=function(){var f=b.getAttribute('data-f');S.feat[f]=!S.feat[f];b.setAttribute('aria-pressed',S.feat[f])}});
+
+$('#go').onclick=function(){$('#hero').hidden=true;$('#perks').hidden=true;$('#form').hidden=false;show(0);window.scrollTo(0,0);$('#name').focus()};
+function show(n){step=n;for(var i=0;i<N;i++)$('#s'+i).hidden=i!==n;$('#steps').innerHTML=Array(N+1).join('0').split('').map(function(_,i){return '<i class="'+(i<=n?'on':'')+'"></i>'}).join('');
+  $('#back').hidden=n===0;$('#next').textContent=n===N-1?'Create my site':'Continue';err('');if(n===1)kits()}
+function err(m){var e=$('#err');e.textContent=m;e.hidden=!m}
+
+/* web address */
+function slugFrom(n){return n.toLowerCase().replace(/\b(fc|united|football|club|sc|afc|the)\b/g,'').replace(/[^a-z0-9]/g,'').slice(0,20)||''}
+function shortFrom(n){var w=n.replace(/[^A-Za-z0-9 ]/g,'').split(/\s+/).filter(Boolean);return (w.length>1?w.slice(0,3).map(function(x){return x[0]}).join(''):(w[0]||'').slice(0,3)).toUpperCase()}
+$('#name').oninput=function(){var v=this.value;if(!S.slugTouched){$('#slug').value=slugFrom(v);checkSlug()}if(!S.shortTouched)$('#short').value=shortFrom(v)};
+$('#slug').oninput=function(){S.slugTouched=true;this.value=this.value.toLowerCase().replace(/[^a-z0-9]/g,'');checkSlug()};
+$('#short').oninput=function(){S.shortTouched=true;this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')};
+function checkSlug(){var v=$('#slug').value,h=$('#slugHint');clearTimeout(slugT);slugOk=false;if(!v){h.className='hint';h.textContent='Letters and numbers only.';return}
+  slugT=setTimeout(function(){fetch('/api/signup/check?slug='+encodeURIComponent(v)).then(function(r){return r.json()}).then(function(j){if($('#slug').value!==v)return;slugOk=!!j.ok;h.className='hint '+(j.ok?'ok':'bad');h.textContent=j.ok?(j.host+' is available'):j.reason}).catch(function(){h.textContent='Could not check right now.'})},300)}
+
+/* crest: shrink in the browser so uploads stay small */
+$('#cbtn').onclick=function(){$('#cfile').click()};
+$('#cfile').onchange=function(){var f=this.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var m=420,sc=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+  S.crest=c.toDataURL('image/png');$('#cpv').innerHTML='<img src="'+S.crest+'" alt="">';kits()};im.onerror=function(){err('That image could not be read.')};im.src=rd.result};rd.readAsDataURL(f)};
+
+/* live kit preview, same renderer the shop uses */
+function kits(){var ks=Kit.autoKits($('#c1').value,$('#c2').value);ks.forEach(function(k,i){$('#k'+i).innerHTML=Kit.render(k.spec,{view:'front',crest:S.crest,short:$('#short').value||'FC',uid:'s'+i,label:k.name+' kit'})})}
+$('#c1').oninput=$('#c2').oninput=kits;
+
+function validate(n){
+  if(n===0){if($('#name').value.trim().length<3)return 'Enter your club name.';if(!$('#slug').value)return 'Pick a web address.';if(!slugOk)return 'That web address is not available yet. Check the message under it.'}
+  if(n===2&&!S.squads.length)return 'Pick at least one squad.';
+  if(n===4){if(!$('#owner').value.trim())return 'Enter your name.';if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('#email').value))return 'Enter a valid email.';if($('#pw').value.length<8)return 'Password must be 8 or more characters.'}
+  return ''}
+$('#back').onclick=function(){show(step-1)};
+$('#next').onclick=function(){var m=validate(step);if(m){err(m);return}if(step<N-1){show(step+1);window.scrollTo(0,0);return}submit()};
+function submit(){var b=$('#next');b.disabled=true;b.textContent='Building your site...';
+  var body={name:$('#name').value,slug:$('#slug').value,short:$('#short').value,est:$('#est').value,town:$('#town').value,ground:$('#ground').value,motto:$('#motto').value,primary:$('#c1').value,secondary:$('#c2').value,crest:S.crest,
+    squads:S.squads,trainDays:S.days,trainTime:/^\d{2}:\d{2}$/.test($('#ttime').value)?$('#ttime').value:'16:30',features:S.feat,owner:$('#owner').value,email:$('#email').value.trim().toLowerCase(),contactPhone:$('#phone').value,password:$('#pw').value};
+  fetch('/api/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||'Something went wrong');return j})}).then(function(j){
+    try{sessionStorage.setItem('tok',j.token)}catch(e){}
+    var u=(location.protocol==='http:'&&/^(localhost|127\.)/.test(location.hostname))?location.origin+'/?team='+encodeURIComponent($('#slug').value):'https://'+j.host;
+    $('#form').hidden=true;$('#done').hidden=false;var a=$('#siteUrl');a.href=u;a.textContent=j.host;window.scrollTo(0,0)}).catch(function(e){err(e.message);b.disabled=false;b.textContent='Create my site'})}
+})();
+</script>
+</body>
+</html>

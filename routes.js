@@ -35,7 +35,7 @@ module.exports = function (C) {
     const topFans = mine(D.fans).map(f => ({ n: shortName(f.name), pts: (f.blob && f.blob.points) || 0 })).filter(f => f.pts > 0).sort((a, b) => b.pts - a.pts).slice(0, 6);
     return {
       team: publicTeam(t), kits: ok ? mine(D.kits).filter(k => k.active).map(pubKit) : [], players: mine(D.players), training: mine(D.training), funds: mine(D.funds), standings, topFans,
-      shop: { sizes: S.sizes, delivery: S.delivery, kitBase: S.kit.base, fan: S.fanDiscount }, payMode: pay.live() ? 'mpesa' : 'demo', textures: Kit.TEXTURES
+      shop: { sizes: S.sizes, delivery: S.delivery, kitBase: S.kit.base, feePct: S.kit.feePct, fan: S.fanDiscount }, payMode: pay.live() ? 'mpesa' : 'demo', textures: Kit.TEXTURES
     };
   }
 
@@ -84,7 +84,8 @@ module.exports = function (C) {
     if (!t || !t.active) return send(res, 400, { error: 'unknown team' });
     if (!t.approved) return send(res, 403, { error: 'This club\'s shop is not open yet.' });
     const ph = pay.msisdn(b.phone); if (!ph) return send(res, 400, { error: 'Enter a valid Kenyan phone number.' });
-    const r = addOrder(db(), t.id, Array.isArray(b.items) ? b.items : [], clean(b.name, 60), clean(b.phone, 20), !!b.fan, null, pay.live() ? 'awaiting_payment' : 'new', { live: true, delivery: b.delivery });
+    const isFan = !!b.fan && db().fans.some(f => f.team === t.id && normPh(f.phone) === normPh(b.phone)); /* discount only for registered fans */
+    const r = addOrder(db(), t.id, Array.isArray(b.items) ? b.items : [], clean(b.name, 60), clean(b.phone, 20), isFan, null, pay.live() ? 'awaiting_payment' : 'new', { live: true, delivery: b.delivery });
     if (r.error) return send(res, 400, { error: r.error });
     const o = r.order;
     if (pay.live()) {

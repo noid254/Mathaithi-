@@ -328,6 +328,11 @@ http.createServer(async (req, res) => {
     if (p === '/') p = plat ? '/start.html' : '/index.html'; if (p === '/start' || p === '/start/') p = '/start.html'; if (p === '/admin' || p === '/admin/') p = '/admin.html';
     if (!PUBLIC_OK.test(p)) { res.writeHead(404); return res.end('Not found'); }
     const f = path.join(ROOT, p); if (!f.startsWith(ROOT) || !fs.existsSync(f)) { res.writeHead(404); return res.end('Not found'); }
+    if (p === '/index.html') { /* put the club's own name in the HTML, so there is no flash of another club and crawlers see it */
+      const t = hostTeam(req, Object.fromEntries(u.searchParams)), nm = String(t ? t.name : 'Club').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const html = fs.readFileSync(f, 'utf8').replace(/<title>[^<]*<\/title>/, '<title>' + nm + '</title>').replace(/<b data-cn>[^<]*<\/b>/g, '<b data-cn>' + nm + '</b>');
+      res.writeHead(200, { 'Content-Type': MIME['.html'], 'Cache-Control': 'no-cache' }); return res.end(html);
+    }
     res.writeHead(200, { 'Content-Type': MIME[path.extname(f)] || 'application/octet-stream', 'Cache-Control': p.startsWith('/uploads') || p.startsWith('/img') ? 'public, max-age=86400' : 'no-cache' });
     fs.createReadStream(f).pipe(res);
   } catch (e) { if (!res.headersSent) send(res, 400, { error: e.message }); }
